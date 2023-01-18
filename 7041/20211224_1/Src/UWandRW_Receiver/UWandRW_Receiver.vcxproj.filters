@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Other">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="UWandRW_Receiver">
+      <UniqueIdentifier>{5e8c3723-51e0-4a14-8b00-3ccea674c79a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UWandRW_Receiver_">
+      <UniqueIdentifier>{ad9ae736-2fb2-4bb5-b9f1-a867e634917d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Resource.h">
+      <Filter>Other</Filter>
+    </ClInclude>
+    <ClInclude Include="Ini_Template.h">
+      <Filter>UWandRW_Receiver_</Filter>
+    </ClInclude>
+    <ClInclude Include="WriteDebugLog.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonNet.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="CriticalSection.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="DeleteLogFolder.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="GetTime.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="Ini_PrinterDescriptor.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="Ini_UnwinderManager.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="ReceiveThread.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="SendThread.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="UWandRW_Receiver.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+    <ClInclude Include="Ini_UnwinderManager_work.h">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Ini_Template.cpp">
+      <Filter>UWandRW_Receiver_</Filter>
+    </ClCompile>
+    <ClCompile Include="Common.cpp">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClCompile>
+    <ClCompile Include="DeleteLogFolder.cpp">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClCompile>
+    <ClCompile Include="GetTime.cpp">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClCompile>
+    <ClCompile Include="Ini_PrinterDescriptor.cpp">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClCompile>
+    <ClCompile Include="Ini_UnwinderManager.cpp">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClCompile>
+    <ClCompile Include="ReceiveThread.cpp">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClCompile>
+    <ClCompile Include="SendThread.cpp">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClCompile>
+    <ClCompile Include="UWandRW_Receiver.cpp">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClCompile>
+    <ClCompile Include="WriteDebugLog.cpp">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClCompile>
+    <ClCompile Include="Ini_UnwinderManager_work.cpp">
+      <Filter>UWandRW_Receiver</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="UWandRW_Receiver.rc">
+      <Filter>Other</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

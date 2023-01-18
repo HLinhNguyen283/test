@@ -1,0 +1,3290 @@
+**#7041 [TP-J560XDn]XJMF communication between controller and UW**
+====================================================================================
+
+----------------------------------------------------------------
+**Change log**
+----------------------------------------------------------------
+
+    =======     ==============      ===========     ============================================================================================================
+    Rev.        Date                Author          Details
+    =======     ==============      ===========     ============================================================================================================
+    **1**       2021/12/20          GCS             Created
+    **2**       2021/12/31          GCS             Updated
+                                                        * Update solution for spec 205, 206, 207
+                                                        * Add solution for spec 208
+                                                        * Update diagram 202.1, 202.2, 202.3, 205.10, 206.1, 206.2, 206.3, 206.4, 207.3
+                                                        * Add diagrams 205.9, 205.12, 205.14, 205.15, 205.16, 205.18, 205.19, 205.20, 207.1, 207.2, 208.1, 208.2
+                                                        * Delete diagram 206.5
+    **3**       2022/01/12          GCS             Updated
+                                                        * Update solution for spec 202, 205, 206, 207, 208
+                                                        * Update diagram 201.1, 202.1, 202.2, 202.3, 203.2, 203.3, 205.3, 205.9, 205.10, 205.11, 205.12, 205.13, 205.14, 205.15, 205.16, 205.23, 206.1, 206.2, 206.3, 206.4, 207.2, 208.1, 208.2
+                                                        * Add diagrams 205.17, 205.18, 205.19, 205.20, 205.24, 205.25, 205.26, 205.27, 206.5, 206.6, 206.7
+    **4**       2022/02/23          GCS             Updated
+                                                        * Update description for spec 203
+                                                        * Update solution for spec 201, 203, 205
+                                                        * Delete 205.19, 205.22, 205.23, 205.24, 205.25, 205.26 (the diagram numbers are in Rev3)
+                                                        * Update 201.2, 205.4, 205.5, 205.10, 205.14, 205.15, 205.16, 205.17, 206.4
+                                                        * Add 203.8, 205.18, 205.19, 205.20, 205.24, 205.25, 205.26, 205.27, 205.28
+    =======     ==============      ===========     ============================================================================================================ 
+
+
+
+----------------------------------------------------------------
+**Target System**
+----------------------------------------------------------------
+    [TP-J560XDn]Ver1.00_base_3.50
+
+
+**Note for diagrams**
+-----------------------
+
+     .. uml::
+     
+        @startuml images\noteDiagram.png
+        legend left
+            |=Note for colors in diagram|
+            |<back:Yellow>Updated source code</back>|
+            |<back:Green>New source code</back>|
+            |<back>Old source code</back>|
+            |<back:red><strike>Deleted source code|
+        endlegend
+        @enduml
+
+-----------------------
+**200. JetDrive**
+-----------------------
+    | The behaviors of 201 to 208 below work only when the key below is 1.
+    | [File name] PrinterDescriptor.ini
+    | [Section name] OPTION
+    | [Key name] UW_CONNECT_FUNCTION
+    | The default value of the above key is 0.
+
+**201. Check the startup of the HTTP communication service program.**
+-----------------------------------------------------------------------
+    **1. Description**
+        | If UWandRW_Receiver.exe is not started when the controller is started, the following warning message dialog is displayed. 
+        | (Ja)前後装置の通信サービスプログラムが起動していません。
+        | (En) The communication service program of the front and rear devices has not started.
+
+    **2. Solution**
+        - Add resource into strings_UnwinderManager.ini file to display UWandRW_Receiver.exe is not started.
+
+        .. code-block:: ini
+            :caption: Resource\\English\\strings_UnwinderManager.ini
+
+            [MSG]
+            IDM_NOTIFY_RECEIVER_STATUS = The communication service program of the front and rear devices
+            has not started.
+
+        .. code-block:: ini
+            :caption: Resource\\Japanese\\strings_UnwinderManager.ini
+            
+            [MSG]
+            IDM_NOTIFY_RECEIVER_STATUS = 前後装置の通信サービスプログラムが起動していません。
+        - In CommonDef.h, add a new value to ENUM_ERR_CODE enum to display the warning ID in UnwinderManager plugin.
+            .. code-block:: C++
+                :caption: Common\CommonDef.h
+
+                //Before
+                ERR_RDPMONITOR	= 17700,	//!< RDPMonitor.dll 17700 - 17799(HD/NX)
+                ERR_PRINT_STOP	= 17800,	//!< PrintStop.dll 17800 - 17899(HD/NX)
+                //次は17900.
+
+                //After
+                ERR_RDPMONITOR	= 17700,	//!< RDPMonitor.dll 17700 - 17799(HD/NX)
+                ERR_PRINT_STOP	= 17800,	//!< PrintStop.dll 17800 - 17899(HD/NX)
+                ERR_UNWINDER_MANAGER = 18600,	//!< UnwinderManager.dll 18600-18699 (XDn)
+
+                //次は18700.
+
+        - Add class CDataIF inherits from CMakeComposeUnwinderData.
+        - In function CDataIF::PIM_InitSystem(), check UW_CONNECT_FUNCTION if 1 then create a thread to run plugin main process.
+        - In function CDataIF::PIM_ExitSystem(), signal thread to exit.
+            .. code-block:: C++
+                :caption: UnwinderManager\\Data_IF.h
+
+                class CDataIF : public CBaseDataIF,
+                                public CMakeComposeUnwinderData
+                {
+                public:
+                    void Initialize();
+                    void Finalize();
+                    virtual BOOL PIM_InitSystem();
+                    virtual BOOL PIM_ExitSystem();
+                    ...
+                }
+
+        - Add class CRequestUnwinderThread() to run main process.
+        - At first, check for process "UWandRW_Receiver.exe" running, if not then display warning dialog.
+        - Add loop to wait until "UWandRW_Receiver.exe" running to continue process.
+            .. code-block:: C++
+                :caption: UnwinderManager\\RequestUnwinderThread.h
+
+                class CRequestUnwinderThread
+                {
+                public:
+                    CRequestUnwinderThread();
+                    virtual ~CRequestUnwinderThread();
+                    void Initialize(CMakeComposeUnwinderData* unwinderData);
+                    void Finalize();
+                    void StartThread();
+                    void EndThread();
+                    ...
+                private:
+                    void ThreadProc();
+                    void CheckReceiverRunning();
+                    CRequestUnwinder m_RequestUnwinder;
+                    ST_THREAD_INFO m_Thread;
+                    HANDLE m_ExitThreadEvent;
+                    HANDLE m_ReceiverProcess;
+                    bool m_ExitThread;
+                    bool m_ReceiverRunning;
+                    ...
+                } 
+
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+    **3. Detail implementation**
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 201.1 Main flow
+
+            participant CDataIF as data
+            participant CRequestUnwinderThread as main
+            participant CReceiveSignalStatusThread as server
+            -[#green]> data++: <color green>PIM_InitSystem()
+                OPT <color green> UW_CONNECT_FUNCTION == 1
+                    data -[#green]> main++: <color green>StartThread()
+                        main -[#green]> main++: <color green>TM_createThread(ThreadProc)
+                        return <color green>m_Thread
+                    return  
+                END
+            return
+            -[#green]> main++: <color green>ThreadProc()
+                            LOOP <color green>true
+                    main-[#green]> main++: <color green>CheckReceiverRunning()
+                        REF over main
+                            <color green>Refer to <b>201.2
+                        END REF
+                    return
+                    OPT <color green>m_ExitThread == true
+                        BREAK
+                        END
+                    END
+                    LOOP <color green>true
+                        main-[#green]> main++: <color green>CheckUWstatus()
+                            REF over main
+                                <color green>Refer to <b>202.1
+                            END REF
+                            return
+                        OPT <color green>m_ExitThread == true
+                            BREAK <color green>outer loop
+                            END
+                        END
+                        OPT <color green>m_ReceiverRunning == false
+                            BREAK
+                            END
+                        END
+                        OPT <color green> m_StatusRequested == true
+                        main-[#green]> main++: <color green>NotifyAndQueryResource()
+                            REF over main
+                                <color green>Refer to <b>202.2
+                            END REF
+                        return
+                        main-[#green]>server++: <color green>StartThread()
+                            REF over server: <color green>Refer to <b>205.1
+                        return
+                        END
+                        main-[#green]> main++: <color green>CheckEvents()
+                            REF over main
+                                <color green>Refer to <b>202.3
+                            END REF
+                        return
+                    END
+                    main-[#green]> main++: <color green>Cleanup()
+                    REF over main
+                        <color green>Refer to <b>207.3
+                    END REF
+                    return
+                END
+            return
+
+            -[#green]> data++: <color green>PIM_ExitSystem()
+                OPT <color green> UW_CONNECT_FUNCTION == 1
+                    data -[#green]> main++: <color green>EndThread()
+                        NOTE OVER of main #green
+                            SetEvent(m_ExitThreadEvent);
+                            TM_deleteThread(m_Thread)
+                        END NOTE
+                    return  
+                END
+            return
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 201.2 Check Receiver is running
+
+            participant CRequestUnwinderThread as main
+            -[#green]> main++: <color green>CheckReceiverRunning()
+                main-[#green]>main++: <color green>CheckProcessRunning()
+                    NOTE OVER main #green
+                    EnumProcesses(ProcessID, sizeof(ProcessID), &dwSize);
+                    DWORD dwMax = (dwSize / sizeof(DWORD));
+                    for (DWORD dwNow = 0; dwNow < dwMax; dwNow++)
+                    {
+                        HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, ProcessID[dwNow]);
+                        if (hProcess != NULL)
+                        {
+                            if (EnumProcessModules(hProcess, Module, sizeof(Module), &dwSize))
+                            {
+                                GetModuleFileNameEx(hProcess, Module[0], szFile, sizeof(szFile));
+                                TCHAR* szModuleName = PathFindFileName(szFile);
+                                if (_tcscmp(szModuleName, _T("UWandRW_Receiver.exe")) == 0)
+                                {
+                                    ret = true;
+                                    m_ReceiverProcess = hProcess;
+                                    break;
+                                }
+                            }
+                            CloseHandle(hProcess);
+                        }
+                    }
+                    return ret;
+                    END NOTE
+                return <color green>m_ReceiverRunning
+                OPT <color green> m_ReceiverRunning == false
+                    NOTE OVER of main #green
+                        char errorMsg[512] = {0};
+                        _snprintf(errorMsg, sizeof(errorMsg) - 1, "%d\n%s", 
+                            (ID_MESSAGE_UNWINDERMANAGER + IDM_NOTIFY_RECEIVER_STATUS), 
+                            (char*)LoadResourceString(IDM_NOTIFY_RECEIVER_STATUS, RESOURCE_MSG_STR));
+                        ShowMessageBox(errorMsg, MBST_ICONERROR | MBST_OK | MBST_MODELESS, NULL);
+                    END NOTE
+                     REF over main: <color green>Refer to <b>206.1
+                END
+                LOOP <color green> m_ReceiverRunning == false
+                        NOTE OVER of main #green
+                            WaitForSingleObject(m_ExitThreadEvent, 1000);
+                        END NOTE
+                        OPT <color green> ret == WAIT_OBJECT_0 //exitThreadEvent
+                            NOTE OVER of main #green
+                                m_ExitThread = true;
+                            END NOTE
+                            BREAK
+                        END
+                    END
+                        main-[#green]>main++: <color green>CheckProcessRunning()
+                        return <color green>m_ReceiverRunning
+                END
+                return
+            @enduml
+
+**202. Communication channel registration for UW**
+---------------------------------------------------
+    **1. Description**
+        | The controller registers the communication channel in order to acquire information from the UW.
+        | Specify the URL when registering the channel, and notify the information to that URL.
+        | Save the response channel ID in the TP-UW_Communication.ini file.
+        | The following two communication channels are used, and channel registration assumes that UW is running.
+        | A.	Condition monitoring channel（Channel for the controller to get the status of UW from UW）
+        | The channel registration timing is when the controller is started.
+        | B.	Paper information notification channel（Channel for the controller to obtain the remaining amount of paper, roll diameter, and paper thickness from UW）
+        | The channel registration timing is set immediately after the print condition information is set in the UW from the controller and the setting result response is received from the UW.
+        | The timing of setting the print conditions will be described in 204 below.
+        |
+        | The registered notification channel is reflected / updated in various keys of TP-UW_Communication_work.ini.
+        | ※Please refer to【TP-UW_Communication_work.ini】(See below)
+
+
+    **2. Solution**
+        - Condition monitoring channel:
+            + In function CRequestUnwinderThread::ThreadProc(), call to RequestQueryStatus().
+        - Paper information notification channel:
+            + Add function CRequestUnwinderThread::NotifyAndQueryResource() and call in CRequestUnwinder::ThreadProc().
+            + In CRequestUnwinderThread::NotifyAndQueryResource(), call to RequestQueryResource() after RequestCommandResource() (Refer to 203).
+            + When there is an event (post message WM_USER_NOTIFY_QUERY_RESOURCE from other plugins), register again.
+
+        .. code-block:: C++
+            :caption: UnwinderManager\\RequestUnwinderThread.h
+
+                class CRequestUnwinderThread
+                {
+                private:
+                ...
+                void CheckUWStatus();
+                void NotifyAndQueryResource(const std::string& inSectionId = "");
+                void CheckEvents();
+                ...
+                bool m_StatusRequested;
+                bool m_ResouceRequested;
+                ...
+                }
+
+        .. code-block:: C++
+            :caption: UnwinderManager\\RequestUnwinderThread.cpp
+
+                #define WM_USER_NOTIFY_QUERY_RESOURCE	WM_USER+102
+
+    **3. Detail implementation**
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 202.1 Register condition monitoring channel
+
+            participant CRequestUnwinderThread as main
+            participant CRequestUnwinder as req
+            participant CIni_UnwinderManager_work as ini
+            -[#green]> main++: <color green>CheckUWStatus()
+                main-[#green]>req++: <color green> RequestQueryStatus()
+                    NOTE over req: Other processing
+                    OPT <color green> ReturnCode == "0"
+                        req -[#green]>ini++: <color green>putStatusCannelID(channelID)
+                        return
+                    END
+                return <color green> result
+                ALT <color green> result.find("[SUCCESS]") == std::string::npos
+                    NOTE OVER main #green
+                        // result != "[SUCCESS]"
+                    END NOTE
+                    REF OVER main
+                    <color green>Refer to <b>206.1
+                    END REF
+                ELSE
+                    NOTE OVER main #green
+                        // result == "[SUCCESS]"
+                        m_StatusRequested = true;
+                    END NOTE
+                    main-[#green]>main++: <color green> SetTimerStatusReceive()
+                    REF OVER main
+                        <color green>Refer to <b>206.5
+                    END REF
+                END
+            return <color green>
+            @enduml
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 202.2 Register paper information notification channel
+
+            participant CRequestUnwinderThread as main
+            participant CRequestUnwinder as req
+            participant CIni_UnwinderManager_work as ini
+            -[#green]> main++: <color green>NotifyAndQueryResource()
+                REF over main
+                        <color green> Refer to <b>203.1
+                    END REF
+                OPT <color green> result.find("[SUCCESS]") != std::string::npos
+                    main-[#green]>req++: <color green>RequestQueryResource()
+                        NOTE over req: ...
+                        OPT <color green> ReturnCode == "0"
+                            req -[#green]>ini++: <color green>PutResourceCannelID(channelID)
+                            return
+                        END
+                    return <color green>result
+                    OPT <color green> result.find("[SUCCESS]") != std::string::npos
+                        NOTE OVER main #green
+                            // result == "[SUCCESS]"
+                            m_ResouceRequested = true;
+                        END NOTE
+                        main-[#green]>main++:<color green>SetTimerPaperReceive()
+                            REF over main: <color green> Refer to <b>205.11
+                        return
+                    END
+                END
+            return
+            @enduml
+
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 202.3 Register channel when event happens
+
+            participant CRequestUnwinderThread as main
+            -[#green]> main++: <color green>CheckEvents()
+                LOOP <color green>true
+                    NOTE over main #green
+                        handles[0] = m_ExitThreadEvent;
+                        handles[1] = m_receiverHandle;
+                        ret = MsgWaitForMultipleObjects(handles, 1000);
+                        END NOTE
+                    ALT <color green> ret == WAIT_OBJECT_0
+                        NOTE over main #green
+                            m_ExitThread = true;
+                        END NOTE
+                        BREAK
+                    END
+                    ELSE <color green> ret == WAIT_OBJECT_0+1
+                        NOTE over main #green
+                            m_ReceiverRunning = false;
+                        END NOTE
+                        BREAK
+                END
+                    ELSE <color green> ret == WAIT_OBJECT_0+2
+                        NOTE over main #green
+                            ret = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+                        END NOTE
+                        LOOP <color green> ret == true
+                            ALT <color green> msg == WM_USER_NOTIFY_QUERY_RESOURCE
+                                main-[#green]>main++: <color green>NotifyAndQueryResource()
+                                return
+                            END
+                            NOTE over main #green
+                                TranslateMessage(&msg);
+                                DispatchMessage(&msg);
+                            END NOTE
+                        END
+                    END
+                END
+            return <color green>
+            @enduml
+
+**203. Notify UW of print condition information.**
+---------------------------------------------------
+    **1. Description**
+        | The print conditions to be notified are as bellow.
+        | ・Print condition name(DescriptiveName)
+        | ・Media name(MediaType)
+        | ・Paper width(Dimension X point)
+        | ・Paper remaining amount(Dimension Y point)
+        | ・Paper thickness(Thickness)
+        | ・Tension(scr:UWTension)
+        | ・Print speed(scr:MaxRunSpeed)
+        | ※For tension and speed, use the calculation result using the formula described at the time of additional update. Once, the value as it is notified.
+
+        | Notify UW of printing conditions at the following timing.
+        | 1.When controller is started.(Current print condition)
+        | 2. When switching the current print condition(Current print condition)
+        | 3. When changing the current print condition setting(Current print condition)
+        | 4. When the job is running (Print conditions during job execution)
+        | 5. When the job running status is released (Current print condition)
+
+        | Regarding 4, in the case of continuous job printing, the content of the print conditions of the first job is notified.
+
+    **2. Solution**
+        - In CRequestUnwinderThread::NotifyAndQueryResource():
+            + Depend on sectionId empty (current print condition) or not empty (job print condition), get the neccessary information.
+            + call to RequestCommandResource().
+        - | Case 1 When controller is started:
+          | Call to NotifyAndQueryResource() in CRequestUnwinderThread::ThreadProc().  (Refer to 202)
+        - Add plugin callbacks functions.
+            .. code-block:: C++
+                :caption: UnwinderManager\\Plugin_IF.h
+
+                PLUGIN_MODULE_API bool _UnwinderManager_GetCallbacks(struct SUnwinderManager_Callbacks*
+                outCallbacks);
+
+            .. code-block:: C++
+                :caption: Common\\UnwinderManager_Callbacks.h
+
+                typedef void (*_OnFirstJobRun)(const std::string& inSectionId);
+                typedef void (*_OnSetCurrentPrintCondition)();
+                typedef void (*_OnUpdateCurrentPrintCondition)();
+                typedef void(*_OnEndJobRun)();
+                struct SUnwinderManager_Callbacks
+                {
+                    //Version 1
+                    DWORD                           StructVersion;
+                    _OnSetCurrentPrintCondition     OnSetCurrentPrintCondition;
+                    _OnUpdateCurrentPrintCondition  OnUpdateCurrentPrintCondition;
+                    _OnFirstJobRun                  OnFirstJobRun;
+
+                    //Version 2
+                    _OnEndJobRun					OnEndJobRun;
+                }
+
+            .. code-block:: C++
+                :caption: UnwinderManager\\UnwinderManager_OP.h
+
+                    class CUnwinderManager_OP : public CUnwinderManager
+                    {
+                    public:
+                        ...
+                        void OnSetCurrentPrintCondition();
+                        void OnUpdateCurrentPrintCondition();
+                        void OnFirstJobRun(const std::string& inSectionId);
+                        void OnEndJobRun();
+                        ...
+                    }
+
+            .. code-block:: C++
+                :caption: UnwinderManager\\Data_IF.h
+
+                class CDataIF
+                {
+                public:
+                    ...
+                    void OnSetCurrentPrintCondition();
+                    void OnUpdateCurrentPrintCondition();
+                    void OnFirstJobRun(const std::string& inSectionId);
+                    void OnEndJobRun();
+                    ...
+                }
+
+
+        - Add function CRequestUnwinderThread::MsgNotifyAndQueryResource() to notify main thread of the event.
+            .. code-block:: C++
+                :caption: UnwinderManager\\RequestUnwinderThread.h
+
+                class CRequestUnwinderThread
+                {
+                public:
+                    ...
+                    void MsgNotifyAndQueryResource(const std::string& inSectionId = "");
+                    ...
+                }
+
+        - In each callback function, call to CRequestUnwinderThread::MsgNotifyAndQueryResource().
+        - | Case 2 When switching the current print condition:
+          | In plugin PrintConditionGUI: call to SUnwinderManager_Callbacks::OnSetCurrentPrintCondition() in CDataIF::SetCurrentPrintCondition() 
+        - | Case 3 When changing the current print condition setting:
+          | In plugin PrintConditionGUI: call to SUnwinderManager_Callbacks::OnUpdateCurrentPrintCondition() in CDataIF::SaveCurrentPrintCondition() 
+        - | Case 4 When the job is running:
+          | In plugin JobPrintSequence: call to SUnwinderManager_Callbacks::OnFirstJobRun() in JobPrintManager::runJob() 
+        - | Case 5 When the job running status is released:
+          | In plugin JobPrintSequence: call to SUnwinderManager_Callbacks::OnEndJobRun() in JobPrintManager::ProStartJobPrintSeq() 
+
+    **3. Detail implementation**
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 203.1 Notify UW of print condition information
+            participant CRequestUnwinderThread as main
+            participant CRequestUnwinder as req
+            -[#green]> main++: <color green>NotifyAndQueryResource(sectionId)
+                NOTE over main #green: CUnwinderPaper unwinderPaper;
+                ALT <color green>sectionId == ""
+                    main-[#green]> main++: <color green>GetPrintConditionResourceInfo(&unwinderPaper)
+                        REF over main: <color green> Refer to <b>203.2
+                     return
+                ELSE
+                    main-[#green]> main++: <color green>GetJobResourceInfo(&unwinderPaper, sectionId)
+                        REF over main: <color green> Refer to <b>203.3
+                    return
+                END
+                main-[#green]>req++: <color green>RequestCommandResource(unwinderPaper)
+                return <color green>result
+                REF OVER main: <color green>Refer to <b>202.2
+            return
+            @enduml
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 203.2 Get current print condition information
+            participant CRequestUnwinderThread as main
+            participant SPaperDB_Callbacks as pdb
+            participant CData_IF as data
+            -[#green]> main++: <color green>GetPrintConditionResourceInfo(\t\n<color green>UnwinderPaper& unwinderPaper)
+                NOTE over main #green: // current print condition
+                main-[#green]>pdb++: <color green>PDB_GetCurrentPrintCondition()
+                return <color green>name
+                main-[#green]>pdb++: <color green>PDB_GetPaperSizeW(name)
+                return <color green>sizeW
+                main-[#green]>pdb++: <color green>PDB_GetPaperType(name)
+                return <color green>mediaType
+                main-[#green]>pdb++: <color green>PDB_GetPaperThickness(name)
+                return <color green>thickness
+                main-[#green]>pdb++: <color green>PDB_GetPaperTension(name)
+                return <color green>tension
+                main-[#green]>pdb++: <color green>PDB_GetModeResoSpeed(name)
+                return <color green>speed
+                main-[#green]>data++: <color green>GetCommandResourceExternalID()
+                return <color green>externalID
+                main-[#green]>data++: <color green>GetUWPaperRemainingAmount()
+                return <color green>paperAmount
+                NOTE over main #green
+                    unwinderPaper.DescriptiveName = name;
+                    sprintf(szTmp, "%0.2f %0.2f", sizeW, paperAmount);
+                    unwinderPaper.Dimension = szTmp;
+                    unwinderPaper.MediaType = mediaType;
+                    sprintf(szTmp, "%d", thickness);
+                    unwinderPaper.Thickness = szTmp;
+                    sprintf(szTmp, "%d", tension);
+                    unwinderPaper.UWTension = szTmp;
+                    sprintf(szTmp, "%d", speed);
+                    unwinderPaper.MaxRunSpeed = szTmp;
+                    unwinderPaper.ExternalID = externalID;
+                END NOTE
+            return
+            @enduml
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 203.3 Get job print condition information
+            participant CRequestUnwinderThread as main
+            participant SJobManager_Callbacks as jm
+            participant CData_IF as data
+            -[#green]> main++: <color green>GetJobResourceInfo(\t\n<color green>CUnwinderPaper& unwinderPaper,\t\n<color green>const std::string& sectionId)
+                NOTE over main #green: // job print condition
+                main-[#green]>jm++: <color green>JM_GetPrintCondition(sectionId)
+                return <color green>name
+                main-[#green]>jm++: <color green>JM_GetPaperSizeW(sectionId)
+                return <color green>sizeW
+                main-[#green]>jm++: <color green>JM_GetPaperType(sectionId)
+                return <color green>mediaType
+                main-[#green]>jm++: <color green>JM_GetPaperTension(sectionId)
+                return <color green>tension
+                main-[#green]>jm++: <color green>JM_GetModeResoSpeed(sectionId)
+                return <color green>speed
+                main-[#green]>data++: <color green>GetCommandResourceExternalID()
+                return <color green>externalID
+                main-[#green]>data++: <color green>GetUWPaperRemainingAmount()
+                return <color green>paperAmount
+                NOTE over main #green
+                    unwinderPaper.DescriptiveName = name;
+                    sprintf(szTmp, "%0.2f %0.2f", sizeW, paperAmount);
+                    unwinderPaper.Dimension = szTmp;
+                    unwinderPaper.MediaType = mediaType;
+                    sprintf(szTmp, "%d", thickness);
+                    unwinderPaper.Thickness = szTmp;
+                    sprintf(szTmp, "%d", tension);
+                    unwinderPaper.UWTension = szTmp;
+                    sprintf(szTmp, "%d", speed);
+                    unwinderPaper.MaxRunSpeed = szTmp;
+                    unwinderPaper.ExternalID = externalID;
+                END NOTE
+            return
+            @enduml
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 203.4 Set callback functions
+
+            participant Plugin_IF as plugin
+            -[#green]> plugin++: <color green>_UnwinderManager_GetCallbacks(\t\n<color green>struct SUnwinderManager_Callbacks* outCallbacks)
+                NOTE OVER of plugin #green
+                    outCallbacks->OnFirstJobRun = OnFirstJobRun;
+                    outCallbacks->OnSetCurrentPrintCondition = OnSetCurrentPrintCondition;
+                    outCallbacks->OnUpdateCurrentPrintCondition = OnUpdateCurrentPrintCondition;
+                END NOTE
+            return <color green>
+            @enduml
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 203.5 Switching the current print condition
+
+            participant "PrintConditionGUI\CDataIF" as data1
+            participant SUnwinderManager_Callbacks as cb
+            participant Plugin_IF as plugin
+            participant CUnwinderManager_OP as op
+            participant CData_IF as data2
+            participant CRequestUnwinderThread as main
+            -> data1++: SetCurrent\t\nPrintCondition()
+                NOTE over data1: Old implementation
+                data1-[#green]>plugin++: <color green>_UnwinderManager\t\n<color green>_GetCallbacks()
+                    create cb
+                    plugin-[#green]>cb: <color green> create
+                return <color green>callback
+                data1-[#green]>cb++: <color green><color green>OnSetCurrent\t\n<color green>PrintCondition()
+                    cb-[#green]>plugin++: <color green>OnSetCurrent\t\n<color green>PrintCondition()
+                        plugin-[#green]>op++: <color green>OnSetCurrent\t\n<color green>PrintCondition()
+                            op-[#green]>data2++: <color green>OnSetCurrent\t\n<color green>PrintCondition()
+                                OPT <color green> UW_CONNECT_FUNCTION == 1
+                                    data2-[#green]>main++: <color green>MsgNotifyAnd\t\n<color green>QueryResource()
+                                    NOTE over main #green
+                                        PostThreadMessage(
+                                        m_Thread.thread_id,
+                                        WM_USER_NOTIFY_QUERY
+                                        _RESOURCE);
+                                    END NOTE
+                                    return
+                                END
+                            return
+                        return
+                    return
+                return
+            return
+            @enduml
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 203.6 Changing the current print condition setting
+
+            participant "PrintConditionGUI\CDataIF" as data1
+            participant SUnwinderManager_Callbacks as cb
+            participant Plugin_IF as plugin
+            participant CUnwinderManager_OP as op
+            participant CData_IF as data2
+            participant CRequestUnwinderThread as main
+            -> data1++: SavePrintCondition()
+                NOTE over data1: Old implementation
+                NOTE over data1
+                    bool isSaveSuccess = m_systemSetting->
+                    GetPaperDB_Callbacks()->PDB_CommitPaperDB();
+                    SetChangeParam();
+                END NOTE
+                NOTE over data1 #green
+                    bool selecting = false;
+                    const char* printConditionName = NULL;
+                    bool ret = m_PrintSettings->GetCurrentPrintCondition(
+                        &selecting, &printConditionName);
+                END NOTE
+                OPT <color green>ret == TRUE && selecting == TRUE
+                data1-[#green]>plugin++: <color green>_UnwinderManager_\t\n<color green>GetCallbacks()
+                    create cb
+                    plugin-[#green]>cb: <color green> create
+                return <color green>callback
+                data1-[#green]>cb++: <color green>OnUpdateCurrent\t\n<color green>PrintCondition()
+                    cb-[#green]>plugin++: <color green>OnUpdateCurrent\t\n<color green>PrintCondition()
+                        plugin-[#green]>op++: <color green>OnUpdateCurrent\t\n<color green>PrintCondition()
+                            op-[#green]>data2++: <color green>OnUpdateCurrent\t\n<color green>PrintCondition()
+                                OPT <color green> UW_CONNECT_FUNCTION == 1
+                                    data2-[#green]>main++: <color green>MsgNotifyAnd\t\n<color green>QueryResource()
+                                    NOTE over main #green
+                                        PostThreadMessage(
+                                        m_Thread.thread_id,
+                                        WM_USER_NOTIFY_QUERY
+                                        _RESOURCE);
+                                    END NOTE
+                                    return
+                                END
+                            return
+                        return
+                    return
+                return
+                END
+                NOTE over data1: Old implementation
+            return
+            @enduml
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 203.7 Job is running
+
+            participant "JobPrintSequence\JobPrintManager" as proc
+            participant SUnwinderManager_Callbacks as cb
+            participant Plugin_IF as plugin
+            participant CUnwinderManager_OP as op
+            participant CData_IF as data2
+            participant CRequestUnwinderThread as main
+            -> proc++: runJob(\nbool inIsFirstJob,\nbool inIsJobPrintStartButtonPushed)
+                NOTE over proc: Old implementation
+                NOTE over proc
+                    if(getSectionIDOfTopJob(&jobManagerCb, sectionID)) {
+                END NOTE
+
+                proc-[#green]>plugin++: <color green>_UnwinderManager_GetCallbacks()
+                    create cb
+                    plugin-[#green]>cb: <color green> create
+                return <color green>callback
+                proc-[#green]>cb++: <color green><color green>OnFirstJobRun(\t\n<color green>sectionID)
+                    cb-[#green]>plugin++: <color green>OnFirstJobRun(\t\n<color green>sectionID)
+                        plugin-[#green]>op++: <color green>OnFirstJobRun(\t\n<color green>sectionID)
+                            op-[#green]>data2++: <color green>OnFirstJobRun(\t\n<color green>sectionID)
+                                OPT <color green> UW_CONNECT_FUNCTION == 1
+                                    data2-[#green]>main++: <color green>MsgNotifyAnd\t\n<color green>QueryResource(\t\n<color green>sectionID)
+                                    NOTE over main #green
+                                        PostThreadMessage(
+                                        m_Thread.thread_id,
+                                        WM_USER_NOTIFY_
+                                        QUERY_RESOURCE,
+                                        sectionID);
+                                    END NOTE
+                                    return
+                                END
+                            return
+                        return
+                    return
+                return
+                NOTE over proc: Old implementation
+            return
+            @enduml
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 203.8 Notify UW of printing conditions when the job running status is released 
+
+            participant "JobPrintSequence\JobPrintManager" as proc
+            participant "SUnwinderManager_Callbacks" as callback
+            participant Plugin_IF as plugin
+            participant CUnwinderManager_OP as op
+            participant "UnwinderManager\\CData_IF" as data
+            participant CRequestUnwinderThread as main
+            -> proc++: ProStartJobPrintSeq()
+                NOTE over proc: Old implementation
+                NOTE OVER proc
+                    ...
+                        if (false == m_jobDataManager->IsRunJobStopped()) {
+                            WriteLog(LOG_DEBUG, "JobPrintManager::ProStartJobPrintSeq : Successful termination");
+
+                            // ヘルパーのジョブ実行を終了するを呼ぶ
+                            endSystemJobRun();
+                        }
+                    }
+                    catch (ENUM_PROC_RESULT& result) {
+                        WriteLog(LOG_DEBUG, "JobPrintManager::ProStartJobPrintSeq : Exception : in thread loop");
+
+                        if (DEF_PROC_RESULT_FAILED_NEED_MSG == result) {
+                            ShowMessageBox(const_cast<char*>(
+                                m_jobDataManager->GetCommonErrMsg().c_str()), 
+                                MBST_ICONERROR | MBST_OK | MBST_MODELESS, nullptr);
+                        }
+                    }
+                END NOTE
+
+                NOTE OVER proc #green: SUnwinderManager_Callbacks UWCallback;
+                ALT <color green>UnwinderManager_GetCallbacks(\n<color green>&UWCallback)
+                    proc-[#green]>callback++: <color green>OnEndJobRun();
+                        callback-[#green]>plugin++: <color green>OnEndJobRun()
+                            plugin-[#green]>op++: <color green>OnEndJobRun()
+                                op-[#green]>data++: <color green>OnEndJobRun()
+                                    OPT <color green>m_IniPrinterDescriptor.getUnwinderOption() == 1
+                                        data-[#green]>main++: <color green>MsgNotifyAndQueryResource(\n<color green>const std::string & inSectionId)
+                                            NOTE over main #green
+                                                char* pSectionId = new char[256];
+                                                strcpy_s(pSectionId, 256, inSectionId.c_str());
+                                                PostThreadMessage(
+                                                    m_Thread.thread_id,
+                                                    WM_USER_NOTIFY_QUERY_RESOURCE,
+                                                    (WPARAM)pSectionId, 0);
+                                            END NOTE
+                                        return
+                                    END
+                                return
+                            return
+                        return
+                    return
+                ELSE
+                    NOTE over proc #green
+                        WriteToLogBuf(LOG_DEBUG, 
+                        "JobPrintManager::ProStartJobPrintSeq : Failed : UnwinderManager_GetCallbacks");
+                    END NOTE
+                END
+
+                NOTE over proc: Old implementation
+            return
+            @enduml
+
+**205. Reflect paper information notified from UW (Paper thickness, Roll diameter, Paper remaining amount)**
+-------------------------------------------------------------------------------------------------------------------------
+    **1. Description**
+        205-1. Notification timing of paper information from UW to the controller
+            | After the transfer instruction by the controller, UW notifies the paper information at the interval specified at the time of registration of the paper information notification.
+            | If no interval is specified, the paper information will be notified at the interval specified by UW.
+            | However, if the UW is equipped with a paper thickness gauge and the paper thickness changes, the UW will promptly notify the controller.
+            | The controller promptly reflects the paper information notified by UW.
+            | The paper thickness will be reflected in the applicable printing conditions. 
+            | Update the TP-UW_Communication.ini file for the remaining amount of paper and roll diameter.
+
+        205-2. Management of roll diameter and remaining amount of paper
+            Save the roll diameter and remaining amount of paper in the TP-UW_Communication.ini file.
+
+        205-3. Reflect paper thickness information
+            | The UW paper thickness is reflected in the paper thickness information of the current print condition or the print condition during job execution.
+            | The update timing and print conditions to be updated are as follows.
+
+            1) Current print condition
+                | If there is a difference between the paper thickness of the current print condition and the paper thickness of UW when the controller is started, the current print condition is switched, or the setting contents of the current print condition are changed, the following warning dialog is displayed.
+                | (Ja) カレント印刷条件の紙厚情報を更新しますか？
+                | (En) Undecided
+                | If press the "Yes" button, the paper thickness of the current print conditions will be updated.
+                | If press the "No" button, nothing is done.
+            2) Print condition during job execution
+                | When the job execution button or the continuous print button is pressed, the following warning dialog is displayed when there is a difference between the paper thickness of the print condition to be executed and the paper thickness of UW.
+                | (Ja) ジョブ実行を中止し、実行対象のジョブの紙厚情報を更新しますか？
+                | (En) Undecided
+                | If press the "Yes" button is clicked, the job execution is stopped and the print condition paper thickness of the job to be executed is updated.
+                | If press the "No" button, the job execution status is entered as it is.
+
+        205-4. UW icon and paper remaining amount display (※Additional update planned)
+            | As shown in the figure below, the remaining amount of paper (in meters) is visually expressed in the area on the right side of the status bar. (Use UW2.bmp)
+            | If the warning message and the remaining roll icon overlap, the former is given priority and displayed in the foreground.
+
+            .. image:: images/205_4.PNG
+                :width: 25%
+
+            | In the future, when the remaining amount approaches the warning threshold, the winding core will be changed from white to yellow to red.
+            | Currently, there is no way for the controller to know the initial remaining amount of the roll.
+            | At one time, use only the design of the top row (when UW is not started) and the bottom row (when UW is started).
+
+    **2. Solution**
+        - Create a class for receiving thread of the signal status information from UW: 
+            .. code-block:: C++
+                :caption: ReceiveSignalStatusThread.h
+
+                class CReceiveSignalStatusThread
+                {
+                public:
+                    CReceiveSignalStatusThread();
+                    virtual ~CReceiveSignalStatusThread();
+                    // Start a thread
+                    void StartThread();
+                    void EndThread();
+                private:
+                    static UINT __stdcall ThreadFunction( void* pData );
+                    ST_THREAD_INFO m_Thread;
+                    HANDLE m_ExitThreadEvent;
+                };
+
+        - In function CRequestUnwinderThread::CheckUWStatus(), when receive the response from UW sucessfully, start a thread for receiving the signal status information.
+        - Create a class for receiving the signal status info and processing for the received info:
+            .. code-block:: C++
+                :caption: ReceiveSignalStatus.h
+
+                class CReceiveSignalStatus
+                {
+                public:
+                    // Get instance of the class
+                    static CReceiveSignalStatus& GetInstance()
+                    {
+                        static CReceiveSignalStatus receiveSignalStatusInstance;
+                        return receiveSignalStatusInstance;
+                    }
+
+                    CReceiveSignalStatus(CReceiveSignalStatus const&) = delete;
+                    void operator=(CReceiveSignalStatus const&) = delete;
+
+                    virtual ~CReceiveSignalStatus();
+
+                    // Receive signal status info from UW
+                    void ReceiveSignalStatusInfo(CDataIF* inDataIF);
+
+                    // Receive signal status info notified from UWandRW_Receiver
+                    BOOL ReceiveInfo();
+
+                    // Set a CRequestUnwinderThread object
+                    void SetRequestThread(CRequestUnwinderThread* inRequestThread);
+
+                    // Get the paper info receiving status (whether or not the info has been received)
+                    void HasPaperInfoReceived(bool &outHasPaperInfoReceived);
+                    // Get value of paper thickness which is notified from UW
+                    void GetUWPaperThickness(long &outThickness);
+                    /// Get value of paper remaining amount which is notified from UW
+                    void GetUWPaperRemainingAmount(long &outPaperRemainingAmount);
+                    // Set status of paper info receiving
+                    void SetStatusOfPaperInfoReceiving(bool status);
+                    // Set the status for starting of paper info receiving
+                    void SetRecvPaperInfoStartingStatus(bool status);
+                    // Call from CReceiveSignalStatusThread to set/reset break loop condition
+                    void SetExit(bool inVal);
+
+                private:
+                    // CReceiveSignalStatus constructor
+                    CReceiveSignalStatus();
+
+                    // pipe reading
+                    BOOL ReadData(HANDLE inPipe, char* outData, DWORD inSize);
+
+                    // analyze signal status info notified from UWandRW_Receiver
+                    BOOL AnalyzeData(const std::string& inXmldata);
+
+                    // parse xml data
+                    std::string ExecuteParseXml( const std::string& inSignalData, UwXjmfDataMap& 
+                                                outUwXjmfDataMap );
+
+                    // processing when the status info is received
+                    BOOL ReceiveStatusInfo(const std::string& inStatus);
+
+                    // processing when the paper info is received
+                    BOOL ReceivePaperInfo(const std::string& inDescriptiveName,
+                        const std::string& inDimension,
+                        const std::string& inMediaType,
+                        const std::string& inRollDiameter,
+                        const std::string& inThickness);
+
+                    CRequestUnwinderThread* m_RequestThread;
+                    CDataIF* m_dataIF;
+
+                    bool m_paperInfoReceivingStatus; // status of paper info receiving 
+                    bool m_receivedPaperInfo; // whether or not the paper info has been received
+                    bool m_isRecvPaperInfoStarting; // whether it is the first time of paper   
+                                //info receiving from UW since the controller was started
+                    long m_UWThickness; // Value of thickness notified from UW.
+                    long m_paperRemainingAmount; // Value of paper remaining 
+                                            // amount notified from UW.
+                    bool m_IsExit; // set when thread exit
+                };
+        - In class CRequestUnwinderThread, add function to delete/set timer to check signal timeout.
+            .. code-block:: C++
+                :caption: RequestUnwinderThread.h
+
+                #define WM_USER_SET_PAPERINFO_TIMER		WM_USER+101
+                class CRequestUnwinderThread
+                {
+                    ...
+                    // sent msg from ReceiveSignalStatus thread
+	                void MsgSetTimerPaperReceive();
+                    // setting for timeout timer of SignalStatus(PAPER)
+                    void SetTimerPaperReceive();
+                    // stop timeout timer of SignalStatus(PAPER)
+                    void KillTimerPaperReceive();
+                    ...
+                }
+        - In function CReceiveSignalStatus::ReceivePaperInfo:
+            + Stop the current timeout timer and start a new one.
+            + If the paper info is received when the controller is started (m_isRecvPaperInfoStarting is true and flag variable m_paperInfoReceivingStatus is true), compare the value of paper thickness between the current print condition and value notified from UW. If there is a difference, display a warning message box and save the paper thickness into the print condition by using callback functions from PaperDB if "Yes" is chosen on the message box.
+            + If value of m_receivedPaperInfo variable is false then set it to true to indicate that the paper info has been received from UW.
+            + Save the thickness and paper remaining amount values notified from UW to variables m_UWThickness and m_paperRemainingAmount.
+            + Set the remaining amount of paper and roll diameter into TP-UW_Communication.ini file by new created functions: CIni_UnwinderManager_work::SetRollDiameter and CIni_UnwinderManager_work::SetPaperRemainingAmount
+        - Add plugin callback functions:
+            .. code-block:: C++
+                :caption: Common\\UnwinderManager_Callbacks.h
+
+                typedef void(*_GetUWPaperThickness)(long &outThickness);
+                typedef void(*_GetUWPaperRemaingAmount)(long &outPaperRemaingAmount);
+                typedef void(*_HasPaperInfoReceived)(bool &outHasPaperInfoReceived);
+                typedef void(*_UpdateUWPaperThicknessForJob)(
+                    const std::string &inSectionID, bool &outIsUpdateRequested);
+                typedef void(*_UpdateUWPaperThicknessForConsecutiveJobs)(
+                    const std::vector<std::string> &inConsecutiveJobSectionIDs, bool &outIsUpdateRequested);
+                typedef void(*_CheckUpdateUWPaperThicknessForCurrentPrintCondition)(
+                    long inCurrentPaperThickness, bool &outIsUpdateRequested);
+
+                struct SUnwinderManager_Callbacks
+                {
+                    //Version 1
+                    ...
+                    _GetUWPaperThickness			GetUWPaperThickness;
+                    _GetUWPaperRemaingAmount		GetUWPaperRemaingAmount;
+                    _HasPaperInfoReceived			HasPaperInfoReceived;
+
+                    //Version 2
+                    _UpdateUWPaperThicknessForJob UpdateUWPaperThicknessForJob;
+                    _UpdateUWPaperThicknessForConsecutiveJobs UpdateUWPaperThicknessForConsecutiveJobs;
+                    _CheckUpdateUWPaperThicknessForCurrentPrintCondition CheckUpdateUWPaperThicknessForCurrentPrintCondition;
+                }
+
+            .. code-block:: C++
+                :caption: Common\\UnwinderManager_OP.h
+
+                    class CUnwinderManager_OP : public CUnwinderManager
+                    {
+                    public:
+                        ...
+                        void GetUWPaperThickness(long &outThickness);
+                        void GetUWPaperRemainingAmount(long &outUWPaperRemainingAmount);
+                        void HasPaperInfoReceived(bool &outHasPaperInfoReceived);
+
+                        void UpdateUWPaperThicknessForJob(
+                            const std::string &inSectionID, bool &outIsUpdateRequested);
+                        void UpdateUWPaperThicknessForConsecutiveJobs(
+                            const std::vector<std::string> &inConsecutiveJobSectionIDs, 
+                            bool &outIsUpdateRequested);
+                        void CheckUpdateUWPaperThicknessForCurrentPrintCondition(
+                            long inCurrentPaperThickness, bool &outIsUpdateRequested);
+                    }
+
+            .. code-block:: C++
+                :caption: UnwinderManager\\Data_IF.h
+
+                class CDataIF
+                {
+                public:
+                    ...
+                    void GetUWPaperThickness(long &outThickness);
+                    void GetUWPaperRemainingAmount(long &outPaperRemainingAmount);
+                    void HasPaperInfoReceived(bool &outHasPaperInfoReceived);
+
+                    void UpdateUWPaperThicknessForJob(
+                        const std::string &inSectionID, bool &outIsUpdateRequested);
+                    void UpdateUWPaperThicknessForConsecutiveJobs(
+                        const std::vector<std::string> &inConsecutiveJobSectionIDs, 
+                        bool &outIsUpdateRequested);
+                    void CheckUpdateUWPaperThicknessForCurrentPrintCondition(
+                        long inCurrentPaperThickness, bool &outIsUpdateRequested);
+                }
+        - In PrintConditionGUI plugin, in CDataPrintSettings::SetCurrentPrintCondition and CDataIF::SavePrintCondition functions, in case there has been the paper info notified from UW, compare the paper thickness value between the current print condition and the one from UW (value is saved in m_UWThickness variable). If there is a difference then update the value from UW to the current print condition.
+        - In CCtlJobList::Proc and CCtlJobList::OnCommand functions of JobSelectGUI plugin, implement same as in CDataIF::SetCurrentPrintCondition and CDataIF::SavePrintCondition functions, except reflecting the paper thickness value to print condition of jobs, not the current print condition.
+        - Add a warning message to following ini files to display the warning message box for reflecting the paper thickness from UW to the current print condition or print condition of job:
+            .. code-block:: ini
+                :caption: strings_UnwinderManager.ini
+
+                [MSG]
+                //English
+                IDM_UPDATE_PAPER_THICKNESS_TO_CURRENT_PRINT_CONDITION = (*The content is undecided)
+                IDM_UPDATE_PAPER_THICKNESS_TO_JOB = (*The content is undecided)
+                //Japanese
+                IDM_UPDATE_PAPER_THICKNESS_TO_CURRENT_PRINT_CONDITION = カレント印刷条件の紙厚情報を更新しますか？
+                IDM_UPDATE_PAPER_THICKNESS_TO_JOB = ジョブ実行を中止し、実行対象のジョブの紙厚情報を更新しますか？
+
+        - In StatusBar plugin, create a new class CCtlUnwinder for displaying of warning messages and UW icon:
+            .. code-block:: C++
+                :caption: CtlUnwinder.h
+
+                class CCtlWarningIconAndUW : public CBaseCtl
+                {
+                public:
+                    CCtlWarningIconAndUW();
+                    virtual ~CCtlWarningIconAndUW();
+                    virtual long Proc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+                    virtual void OnUpdateState();
+                    virtual void OnUpdateValue();
+                protected:
+                    virtual void OnSetAttribute();
+                    virtual void OnCreateItem();
+                private:
+                    long m_inItemID;	//!< id of warning, which is displaying in HintDlg
+                    DEF_PRINTER_WARNING m_outWarning; //!< type of warning is displaying in HintDlg
+                    std::string m_outMessage; //!< message of warning, which is dispalying in HintDlg
+                    long m_hWndHintDlg;		//!< id of HintDlg
+                };
+        - Refer to CCtlWarningIcon to handle for the warning messages.
+        - In function CCtlWarningIconAndUW::OnUpdateValue, check the status of the UW. If it is not started, display a translucent UW icon (the top icon). If it is started, display normal icon (the bottom icon).
+        - In function CCtlWarningIconAndUW::OnUpdateState, if the status of UW is OFF then hide the paper remaining static box.
+        - In StatusBar\\CDataIF class, add methods and member variable related to UW status:
+            .. code-block:: C++
+                :caption: StatusBar\DataIF.h
+
+                enum UW_STATUS{
+                    UW_STATUS_ON,
+                    UW_STATUS_OFF
+                };
+                class CDataIF
+                {
+                public:
+                    ...
+                    void SetUWStatus(UW_STATUS status);
+                    UW_STATUS GetUWStatus();
+                protected:
+                    UW_STATUS m_UWStatus;
+                };
+        - Modify size of displaying area of data and time control when UW icon is displayed.
+
+    **3. Detail implementation**
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.1 Start receiving signal status thread
+
+            participant CReceiveSignalStatusThread as main
+
+            -[#green]> main: <color green>StartThread()
+            ACTIVATE main
+                NOTE OVER of main #green
+                    m_Thread = TM_CreateThread(ThreadFunction);
+                END NOTE
+                <-[#green]-main
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.2 End receiving signal status thread
+
+            participant CReceiveSignalStatusThread as main
+
+            -[#green]> main: <color green>EndThread()
+            ACTIVATE main
+                NOTE OVER of main #green
+                    SetEvent(m_ExitThreadEvent);
+                    WaitForSingleObject(m_Thread.thread_handle, INFINITE);
+                    TM_deleteThread(m_Thread);
+                END NOTE
+                <-[#green]-main
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.3 Receiving thread
+
+            participant CReceiveSignalStatusThread as main
+            participant CReceiveSignalStatus as recSignalStatus
+
+            -[#green]> main: <color green>ThreadFunction( void* pData )
+            ACTIVATE main
+                NOTE OVER of main #green
+                    CReceiveSignalStatus receiveSignalStatus;
+                END NOTE
+                main-[#green]>recSignalStatus++:<color green> receiveSignalStatus.ReceiveSignalStatusInfo()
+                    LOOP <color green>while(1)
+                        recSignalStatus-[#green]>recSignalStatus++: <color green>ReceiveInfo()
+                            REF OVER recSignalStatus: <color green>Refer to <b>205.4
+                        return
+                        NOTE OVER of recSignalStatus #green: Sleep(3000);
+                    END 
+                return
+                <-[#green]-main: <color green>0
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.4 Receive signal status notified from UWandRW_Receiver
+
+            participant CReceiveSignalStatus as main
+
+            -[#green]> main: <color green>ReceiveInfo()
+            ACTIVATE main
+                NOTE OVER of main #green
+                    HANDLE hPipe = INVALID_HANDLE_VALUE;
+                    hPipe = CreateNamedPipe("\\\\.\\pipe\\Unwinder",
+                                        PIPE_ACCESS_INBOUND | FILE_FLAG_OVERLAPPED,
+                                        PIPE_TYPE_BYTE | PIPE_WAIT,
+                                        1,
+                                        0,
+                                        0,
+                                        100,
+                                        NULL);
+                END NOTE
+                OPT <color green>hPipe == INVALID_HANDLE_VALUE
+                    NOTE OVER of main #green
+                        std::stringstream ss;
+                        ss << "[CReceiveSignalStatus::ReceiveInfo] CreateNamedPipe(\\\\.\\pipe\\Unwinder) Error GetLastError=" << GetLastError();
+                        WriteToLogBuf(LOG_DEBUG, (char*)ss.str().c_str());
+                    END NOTE
+                    <-[#green]-main: <Color green>FALSE
+                END
+                NOTE over main #green
+                    BOOL nRet = ConnectNamedPipe(hPipe, NULL);
+                END NOTE
+                OPT <color green>nRet == FALSE
+                    NOTE over main #green
+                        std::stringstream ss;
+                        ss << "[CReceiveSignalStatus::ReceiveInfo] Pipe Error GetLastError=" << GetLastError();
+                        WriteToLogBuf(LOG_DEBUG, (char*)ss.str().c_str());
+                        CloseHandle(hPipe);
+                    END NOTE
+                    <-[#green]-main: <Color green>FALSE
+                END
+                
+                NOTE OVER of main #green
+                    BOOL ret = true;
+                    char szBuff[10];
+                END NOTE
+                LOOP <color green>ret
+                    OPT <color green>m_IsExit
+                        NOTE over main #green: break;
+                    END
+                    NOTE OVER of main #green: ZeroMemory(szBuff,sizeof(szBuff));
+                    main-[#green]>main++: <color green>ReadData(hPipe, szBuff, 8)
+                        REF OVER main: <color green>Refer to <b>205.5
+                    return <color green>isReadingSuccess
+                    ALT <color green>isReadingSuccess
+                        OPT <color green>m_IsExit
+                            NOTE over main #green: break;
+                        END
+                        NOTE OVER of main #green
+                            long DataSize = atol(szBuff);
+                            char *pXmlData = new char[DataSize+1];
+                            ZeroMemory(pXmlData,DataSize+1);
+                        END NOTE
+                        main-[#green]>main++: <color green>ReadData(hPipe, pXmlData, DataSize)
+                            REF OVER main: <color green>Refer to <b>205.5
+                        return <color green>isReadingSuccess
+                        ALT <color green>isReadingSuccess
+                            OPT <color green>m_IsExit
+                                NOTE over main #green: break;
+                            END
+                            NOTE OVER of main #green
+                                std::string XmlData;
+                                XmlData.append(pXmlData);
+                                delete [] pXmlData;
+                            END NOTE
+                            main-[#green]>main++: <color green>AnalyzeData(XmlData)
+                                REF OVER main: <color green>Refer to <b>205.6
+                            return
+                        ELSE
+                            NOTE OVER of main #green
+                                delete [] pXmlData;
+                                std::stringstream ss;
+                                ss << "[CReceiveSignalStatus::ReceiveInfo] ReadFile Error GetLastError=" << GetLastError();
+                                WriteToLogBuf(LOG_DEBUG, (char*)ss.str().c_str());
+                                ret = FALSE;
+                            END NOTE
+                        END
+                    ELSE
+                        NOTE OVER of main #green
+                            std::stringstream ss;
+                            ss << "[CReceiveSignalStatus::ReceiveInfo] ReadFile Error GetLastError=" << GetLastError();
+                            WriteToLogBuf(LOG_DEBUG, (char*)ss.str().c_str());
+                            ret = FALSE;
+                        END NOTE
+                    END
+                END
+                NOTE OVER of main #green
+                    FlushFileBuffers(hPipe);
+                    DisconnectNamedPipe(hPipe);
+                    CloseHandle(hPipe);
+                END NOTE
+
+                <-[#green]-main: <color green>ret
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.5 Pipe reading
+
+            participant CReceiveSignalStatus as main
+
+            -[#green]> main: <color green>ReadData( HANDLE inPipe, char* OutData, DWORD inSize )
+            ACTIVATE main
+                NOTE OVER of main #green: char* p = OutData;
+                LOOP <color green>inSize
+                    NOTE OVER of main #green
+                        DWORD readSize;
+                        BOOL nRet = ReadFile(inPipe, p, inSize, &readSize, &overlapped);
+                    END NOTE
+                    ALT <color green>nRet == TRUE
+                        NOTE OVER of main #green
+                            inSize -= readSize
+                            p += readSize;
+                        END NOTE
+                    ELSE
+                        NOTE over main #green
+                            std::stringstream ss;
+                            ss << "[CReceiveSignalStatus::ReceiveInfo] Pipe Error GetLastError=" << GetLastError();
+                            WriteToLogBuf(LOG_DEBUG, (char*)ss.str().c_str());
+                        END NOTE
+                        <-[#green]-main: <color green>FALSE
+                    END
+                END
+                <-[#green]-main: <color green>TRUE
+            DEACTIVATE main
+            @enduml
+        
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.6 Analyze signal status info notified from UWandRW_Receiver
+
+            participant CReceiveSignalStatus as main
+
+            -[#green]> main: <color green>AnalyzeData( std::string& inXmldata )
+            ACTIVATE main
+                NOTE OVER of main #green: std::string pickupData = ExecuteParseXml(inXmldata);
+                main-[#green]>main++: <color green>CheckPickupData( pickupData )
+                    REF OVER main: <color green> Refer to <b>205.7
+                return <color green>isDataNotError
+                ALT <color green>isDataNotError
+                    main-[#green]>main++: <color green>SelectPickupData(PickupData, "Type")
+                        REF OVER main: <color green>Refer to <b>205.8
+                    return <color green>Type
+                    main-[#green]>main++: <color green>SelectPickupData(PickupData, "SubType")
+                        REF OVER main: <color green>Refer to <b>205.8
+                    return <color green>SubType
+
+                    OPT <color green>Type == "SignalStatus"
+                        ALT <color green>SubType == "Status"
+                            main-[#green]>main++: <color green>SelectPickupData(PickupData, "Status")
+                                REF OVER main: <color green>Refer to <b>205.8
+                            return <color green>Status
+                            main-[#green]>main++: <color green>ReceiveStatusInfo(Status)
+                                REF OVER main: <color green>Refer to <b>206.2
+                            return
+                        ELSE <color green>SubType == "Paper"
+                            main-[#green]>main++: <color green>SelectPickupData(PickupData, "DescriptiveName")
+                                REF OVER main: <color green>Refer to <b>205.8
+                            return <color green>DescriptiveName
+                            main-[#green]>main++: <color green>SelectPickupData(PickupData, "Dimension")
+                                REF OVER main: <color green>Refer to <b>205.8
+                            return <color green>Dimension
+                            main-[#green]>main++: <color green>SelectPickupData(PickupData, "MediaType")
+                                REF OVER main: <color green>Refer to <b>205.8
+                            return <color green>MediaType
+                            main-[#green]>main++: <color green>SelectPickupData(PickupData, "RollDiameter")
+                                REF OVER main: <color green>Refer to <b>205.8
+                            return <color green>RollDiameter
+                            main-[#green]>main++: <color green>SelectPickupData(PickupData, "Thickness")
+                                REF OVER main: <color green>Refer to <b>205.8
+                            return <color green>Thickness
+                            main-[#green]>main++: <color green>ReceivePaperInfo(DescriptiveName,Dimension,MediaType,RollDiameter,Thickness)
+                                REF OVER main: <color green>Refer to <b>205.10
+                            return
+                        END
+                    END
+                END
+                <-[#green]-main: <color green>TRUE
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.7 Check whether the data returned from UWandRW_Parse_Xml.exe is valid or not
+
+            participant CReceiveSignalStatus as main
+
+            -[#green]> main: <color green>CheckPickupData( const std::string& inData )
+            ACTIVATE main
+                ALT <color green>inData.find("[ERROR]") == std::string::npos
+                    <-[#green]-main: <color green>TRUE
+                ELSE
+                    NOTE OVER of main #green: WriteToLogBuf(LOG_DEBUG,"[CReceiveSignalStatus::CheckPickupData] Error");
+                    <-[#green]-main: <color green>FALSE
+                END
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.8 Extract data from the parsed info
+
+            participant CReceiveSignalStatus as main
+
+            -[#green]> main: <color green>SelectPickupData( const std::string& inScrData, \n<color green>const std::string& inSelectName )
+            ACTIVATE main
+                NOTE OVER of main #green
+                    std::vector<std::string> strList = CUtility::splitString(inScrData, ' ');
+                END NOTE
+                LOOP <color green>auto ite = strList.begin(); ite != strList.end(); ite++
+                    OPT <color green>ite->compare(0,inSelectName.size(),inSelectName) == 0
+                        NOTE OVER of main #green
+                            size_t pos = ite->find("=");
+                        END NOTE
+                        OPT <color green>std::string::npos != pos
+                            <-[#green]-main: <color green>ite->substr(pos+1)
+                        END
+                    END
+                END
+                <-[#green]-main: <color green>""
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.9 Determine the time when the controller is started
+
+            participant CDataIF as main
+
+            -[#green]> main++: <color green>PIM_InitSystem()
+                    NOTE OVER of main #green
+                        CReceiveSignalStatus &receiveSignalStatusInstance = CReceiveSignalStatus::GetInstance();
+                        receiveSignalStatusInstance.SetRecvPaperInfoStartingStatus(true);
+                    END NOTE
+                    REF OVER main: <color green>Refer to <b>'201.1
+                <-[#green]-main:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.10 Processing when the paper info is received
+
+            participant CReceiveSignalStatus as main
+            participant CRequestUnwinderThread as request
+            participant SPaperDB_Callbacks as PDB_Callback
+            participant CIni_UnwinderManager as ini
+
+            -[#green]> main: <color green>ReceivePaperInfo( const std::string& inDescriptiveName, \n<color green>const std::string& inDimension, \n<color green>const std::string& inMediaType, \n<color green>const std::string& inRollDiameter, \n<color green>const std::string& inThickness )
+            ACTIVATE main
+                main-[#green]>request++: <color green>MsgSetTimerPaperReceive()
+                    REF OVER request: <color green>Refer to <b>205.22
+                return
+                NOTE OVER of main #green
+                    long thickness = atol(inThickness.c_str());
+                    m_UWThickness = thickness;
+                    m_receivedPaperInfo = true;
+                END NOTE
+
+               OPT <color green>(m_isRecvPaperInfoStarting && m_paperInfoReceivingStatus)
+                    NOTE OVER of main #green: SPaperDB_Callbacks paperDBCallbacks;
+                    ALT <Color green>PaperDB_GetCallbacks(&paperDBCallbacks)
+                        NOTE OVER of main #green: string printConditionName = "";
+                        main-[#green]>PDB_Callback++: <color green>paperDBCallbacks.PDB_GetCurrentPrintCondition(\n<color green>printConditionName)
+                        return <color green>isGetPrintConditionSuccess
+                        ALT <Color green>isGetPrintConditionSuccess
+                            NOTE OVER of main #green: long pdbThickness = 0;
+                            ALT <color green>paperDBCallbacks.PDB_GetPaperThickness(printConditionName, pdbThickness)
+                                OPT <color green>pdbThickness != thickness
+                                    NOTE OVER of main #green
+                                        std::stringstream msg;
+                                        msg << ID_MESSAGE_UNWINDERMANAGER + IDM_UPDATE_PAPER_THICKNESS_TO_CURRENT_PRINT_CONDITION 
+                                            << "\n" << LoadResourceString(IDM_UPDATE_PAPER_THICKNESS_TO_CURRENT_PRINT_CONDITION, RESOURCE_MSG_STR);
+                                        int result = ShowMessageBox(const_cast<char*>(msg.str().c_str()), MBST_YESNO | MBST_ICONWARNING, NULL);
+                                    END NOTE
+                                    OPT <color green>result == IDYES
+                                        main-[#green]>PDB_Callback++: <color green>paperDBCallbacks.PDB_SetPaperThickness(\n<color green>printConditionName.c_str(), thickness)
+                                        return <color green>isSetPaperThicknessSuccess
+                                        main-[#green]>PDB_Callback++: <color green>paperDBCallbacks.PDB_CommitPaperDB()
+                                        return <color green>isCommitPDBSuccess
+                                        OPT <color green>!isCommitPDBSuccess
+                                            NOTE OVER of main #green: WriteToLogBuf(LOG_DEBUG, "CReceiveSignalStatus::ReceivePaperInfo() error - Cannot commit to PDB");
+                                        END
+                                    END
+                                END
+                            ELSE
+                                NOTE OVER of main #green
+                                    WriteToLogBuf(LOG_DEBUG, "CReceiveSignalStatus::ReceivePaperInfo()
+                                error - Cannot get paper thickness from PDB.")
+                                END NOTE
+                            END
+                        ELSE
+                            NOTE OVER of main #green
+                                WriteToLogBuf(LOG_DEBUG, "CReceiveSignalStatus::ReceivePaperInfo()
+                                error - Cannot get current print condition.")
+                            END NOTE
+                        END
+                    ELSE
+                        NOTE OVER of main #green
+                            WriteToLogBuf(LOG_DEBUG, "CReceiveSignalStatus::ReceivePaperInfo() 
+                            error - Cannot get PaperDB callback.");
+                        END NOTE
+                    END
+                END
+
+                NOTE OVER of main #green: CIni_UnwinderManager_work ini_UWMamagerWork;
+                OPT <Color green>!ini_UWMamagerWork.Initialize()
+                    NOTE OVER of main #green
+                        WriteToLogBuf(LOG_DEBUG, "CReceiveSignalStatus::ReceivePaperInfo() 
+                        error - CIni_PrinterDescriptor is failed to initialization .");
+                    END NOTE
+                    <-[#green]-main: <Color green>FALSE
+                END
+                main-[#green]>ini++: <color green>ini_UWMamagerWork.SetRollDiameter(inRollDiameter)
+                    NOTE OVER of ini #green
+                        WriteValueString(_T("PAPER_INFO"),
+                        _T("ROLL_DIAMETER"), inRollDiameter.c_str());
+                    END NOTE
+                return
+                NOTE OVER of main #green: std::vector<std::string> vDimension = CUtility::splitString(inDimension, ' ');
+                ALT <Color green>vDimension.size() != 2
+                    NOTE OVER of main #green
+                        WriteToLogBuf(LOG_DEBUG, "CReceiveSignalStatus::ReceivePaperInfo() 
+                        error - Invalid dimension.");
+                    END NOTE
+                ELSE
+                   main-[#green]>ini++: <color green>ini_UWMamagerWork.SetRemainingAmount(vDimension.at(1))
+                        NOTE OVER of ini #green
+                            WriteValueString(_T("PAPER_INFO"), 
+                            _T("REMAINING_AMOUNT"), inRemainingAmount.c_str());
+                        END NOTE
+                    return
+                END
+                NOTE OVER of main #green: ini_UWMamagerWork.Finalize()
+                <-[#green]-main: <Color green>TRUE
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.11 Setting for timeout timer of SignalStatus(PAPER)
+
+            participant CRequestUnwinderThread as main
+            participant CMakeComposeUnwinderData as data
+            participant CIni_UnwinderManager as ini
+
+            -[#green]> main: <color green>SetTimerPaperReceive()
+            ACTIVATE main
+                main-[#green]>data++: <color green>GetTimeoutTimerPaper()
+                    data-[#green]>ini++:<color green>getQueryResource_RepeatTime()
+                    return <color green>time1
+                    data-[#green]>ini++:<color green>getSignalstatus_Timeout_Judegment_Waittime()
+                    return <color green>time2
+                    NOTE over data #green
+                        nTimeout = (time1 + time2) * 1000;
+                    END NOTE
+                return <color green>nTimeout
+                NOTE over main #green
+                    m_PaperReceivingTimeId = SetTimer(NULL, m_PaperReceivingTimeId, nTimeout, NULL);
+                END NOTE
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.12 Handle when receive UW paper info is timeout
+
+            participant CRequestUnwinderThread as main
+            participant CReceiveSignalStatus as receive
+            participant CReceiveSignalStatusThread as thread
+            participant CDataIF as data
+
+            -[#green]> main++: <color green>CheckEvents()
+                NOTE over main
+                    Other processing
+                    ret = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+                END NOTE
+                ALT <color green> msg == WM_TIMER
+                    ALT <color green>msg.wParam == m_PaperReceivingTimeId
+                        main-[#green]>receive++: <color green>SetStatusOfPaperInfoReceiving(false)
+                        return
+                        main-[#green]>thread++: <color green>EndThread(false)
+                        return
+                        main-[#green]>main++: <color green>KillTimerPaperReceive()
+                            REF over main: <color green>Refer to <b>205.13
+                        return
+                        main-[#green]>data++: <color green>UpdateDisplayUWStatus(false)
+                        return
+                    END
+                END
+                 NOTE over main
+                    Other processing
+                END NOTE
+            return <color green>
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.13 Stop timeout timer of SignalStatus(PAPER)
+
+            participant CRequestUnwinderThread as main
+
+            -[#green]> main: <color green>KillTimerPaperReceive()
+            ACTIVATE main
+                NOTE OVER of main #green
+                    KillTimer(NULL, m_PaperReceivingTimeId);
+                    m_PaperReceivingTimeId = 0;
+                END NOTE
+                <-[#green]-main:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.14 Reflect the paper thickness notified from UW to the current print condition when switch current print condition
+
+            participant "PrintConditionGUI\CDataPrintSettings" as main
+            participant "PrintConditionGUI\CDataIF" as data
+            participant SPaperDB_Callbacks as PDB_Callback
+            participant SUnwinderManager_Callbacks as UW_Callback
+
+            -> main: SetCurrentPrintCondition()
+            ACTIVATE main
+                OPT m_SelectPrintCondition
+                    NOTE OVER of main #green
+                        CIni_PrinterDescriptor iniPrinterDescriptor;
+                        iniPrinterDescriptor.Initialize(TRUE);
+                    END NOTE
+
+                    OPT <color green>iniPrinterDescriptor.getUnwinderOption() == 1
+                        NOTE OVER of main #green: CDataPaperSettings * dataPaperSettings
+                        main-[#green]>data++: <color green>m_DataIF->GetDataPaperSettings()
+                        return <color green>dataPaperSettings
+                        ALT <color green>dataPaperSettings
+                            NOTE OVER of main #green: SUnwinderManager_Callbacks unwinderManager_Callbacks;
+                            ALT <color green>UnwinderManager_GetCallbacks(&unwinderManager_Callbacks)
+                                NOTE OVER of main #green
+                                    long currentThickness = dataPaperSettings->GetPaperThickness();
+                                    bool isReflectUWPaperThickness = false;
+                                END NOTE
+                                main-[#green]>UW_Callback++: <color green>unwinderManager_Callbacks.CheckUpdateUWPaperThicknessForCurrentPrintCondition(\n<color green>currentThickness, isReflectUWPaperThickness)
+                                return
+                                OPT <color green>isReflectUWPaperThickness
+                                    NOTE OVER of main #green: long UWThickness = INVALID_THICKNESS_VALUE;
+                                    main-[#green]>UW_Callback++: <color green>unwinderManager_Callbacks.GetUWPaperThickness(UWThickness)
+                                    return
+                                    ALT <color green>UWThickness != INVALID_THICKNESS_VALUE
+                                        main-[#green]>PDB_Callback++: <color green>m_PaperDB_Callbacks->PDB_SetPaperThickness(\n<color green>m_SelectPrintCondition->Name, UWThickness)
+                                        return <color green>isSettingSuccess
+                                        ALT <color green>isSettingSuccess
+                                            main-[#green]>data++: <color green>dataPaperSettings->SetCurrentPaperThickness(UWThickness)
+                                            return
+                                            main-[#green]>data++: <color green>dataPaperSettings->SetPaperThickness(UWThickness)
+                                            return
+                                        ELSE
+                                            NOTE OVER of main #green
+                                                WriteToLogBuf(LOG_DEBUG, "CDataPrintSettings::SetCurrentPrintCondition() error 
+                                                    - Cannot set paper thickness to PDB.");
+                                            END NOTE
+                                        END
+                                    ELSE
+                                        NOTE OVER of main #green
+                                            WriteToLogBuf(LOG_DEBUG, "CDataPrintSettings::SetCurrentPrintCondition() error 
+                                                - Invalid UW paper thickness value.");
+                                        END NOTE
+                                    END
+                                END
+                            ELSE
+                                NOTE OVER of main #green
+                                    WriteToLogBuf(LOG_DEBUG, "CDataPrintSettings::SetCurrentPrintCondition() error 
+                                        - Cannot get unwinder manager callback.");
+                                END NOTE
+                            END
+                        ELSE
+                            NOTE OVER of main #green
+                                WriteToLogBuf(LOG_DEBUG, "CDataPrintSettings::SetCurrentPrintCondition() error 
+                                    - Cannot get paper setting data.");
+                            END NOTE
+                        END
+                    END
+                    NOTE OVER of main #green: iniPrinterDescriptor.Finalize();
+                    NOTE OVER of main: Old implementation
+                END
+                <-[#green]-main:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.15 Reflect the paper thickness notified from UW to the current print condition when the setting contents of the current print condition are changed
+
+            participant "PrintConditionGUI\CDataIF" as main
+            participant "PrintConditionGUI\CDataPaperSettings" as data
+            participant SUnwinderManager_Callbacks as UW_Callback
+
+            -> main: SavePrintCondition()
+            ACTIVATE main
+                NOTE OVER of main #green
+                    bool selecting = false;
+                    const char* printConditionName = NULL;
+                    bool hasCurrentPrintCondition = m_PrintSettings->GetCurrentPrintCondition(
+                        &selecting, &printConditionName);
+                END NOTE
+
+                OPT <color green>IsStartFromSystemSetting()
+                    NOTE OVER of main #green
+                        CIni_PrinterDescriptor iniPrinterDescriptor;
+                        iniPrinterDescriptor.Initialize(TRUE);
+                    END NOTE
+                    OPT <color green>iniPrinterDescriptor.getUnwinderOption() == 1
+                        OPT <color green>selecting
+                            NOTE OVER of main #green: SUnwinderManager_Callbacks unwinderManager_Callbacks;
+                            ALT <color green>UnwinderManager_GetCallbacks(&unwinderManager_Callbacks)
+                                NOTE OVER of main #green
+                                    bool isReflectUWThickness = false;
+                                    long currentThickness;
+                                END NOTE
+                                main-[#green]>data++: <color green>m_PaperSettings->GetPaperThickness()
+                                return <color green>currentThickness
+                                main-[#green]>UW_Callback++: <color green>unwinderManager_Callbacks.CheckUpdateUWPaperThicknessForCurrentPrintCondition\n<color green>(currentThickness, isReflectUWThickness);
+                                return
+                                OPT <color green>isReflectUWThickness
+                                    NOTE OVER of main #green: long UWThickness = INVALID_THICKNESS_VALUE;
+						            main-[#green]>UW_Callback++: <color green>unwinderManager_Callbacks.GetUWPaperThickness(UWThickness);
+                                    return
+                                    ALT <color green>UWThickness != INVALID_THICKNESS_VALUE
+                                        main-[#green]>data++: <color green>m_PaperSettings->SetPaperThickness(UWThickness)
+                                        return
+                                    ELSE
+                                        NOTE OVER of main #green
+                                            WriteToLogBuf(LOG_DEBUG, "CDataIF::SavePrintCondition() error 
+                                                - Invalid UW paper thickness value.");
+                                        END NOTE
+                                    END
+                                END
+                            ELSE
+                                NOTE OVER of main #green
+                                    WriteToLogBuf(LOG_DEBUG, "CDataIF::SavePrintCondition() error 
+                                        - cannot get unwinderManager Callbacks.");
+                                END NOTE
+                            END
+                        END
+                    END
+                    NOTE OVER of main #green: iniPrinterDescriptor.Finalize();
+                END
+
+                NOTE OVER of main: Old implementation
+                <-[#green]-main: false
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.16 Reflect the paper thickness notified from UW to the current print condition when the job execution button is pressed
+
+            participant "JobSelectGUI\CCtlJobList" as main
+            participant SJobManager_Callbacks as JM_Callback
+            participant SUnwinderManager_Callbacks as UW_Callback
+
+            -> main: Proc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
+            ACTIVATE main
+                NOTE OVER of main: Old implementation
+                OPT Message == UWM_JOBSELECTGUI_JOB_RUN_START
+                    NOTE OVER of main #green
+                        bool isReflectPaperThickness = false;
+                        CIni_PrinterDescriptor iniPrinterDescriptor;
+                        iniPrinterDescriptor.Initialize(TRUE);
+                    END NOTE
+                    OPT <color green>iniPrinterDescriptor.getUnwinderOption() == 1
+                        NOTE OVER of main #green
+                            SJobManager_Callbacks jobManagerCallbacks;
+                            std::string firstJobID;
+                        END NOTE
+                        ALT <color green>JM_GetCallbacks(&jobManagerCallbacks)
+                            main-[#green]>JM_Callback++: <color green>jobManagerCallbacks.JM_GetTopJobOfPrintQueue(firstJobID)
+                            return <color green>isGetTopJobSuccess
+                            ALT <color green>isGetTopJobSuccess
+                                NOTE OVER of main #green: SUnwinderManager_Callbacks unwinderManager_Callbacks;
+                                ALT <color green>UnwinderManager_GetCallbacks(&unwinderManager_Callbacks)
+                                    main-[#green]>UW_Callback++: <color green>unwinderManager_Callbacks.UpdateUWPaperThicknessForJob(\n<color green>firstJobID, isReflectPaperThickness);
+                                    return
+                                ELSE
+                                    NOTE OVER of main #green
+                                        WriteToLogBuf(LOG_DEBUG, "CCtlJobList::Proc() error 
+                                            - Cannot get unwinder manager callback.");
+                                    END NOTE
+                                END
+                            ELSE
+                                NOTE OVER of main #green
+                                    WriteToLogBuf(LOG_DEBUG, "CCtlJobList::Proc() error 
+                                        - Cannot get top job of the print queue folder.");
+                                END NOTE
+                            END
+                        ELSE
+                            NOTE OVER of main #green
+                                WriteToLogBuf(LOG_DEBUG, "CCtlJobList::Proc() error 
+                                    - Cannot get job manager callback.");
+                            END NOTE
+                        END
+                    END
+                    NOTE OVER of main #green: iniPrinterDescriptor.Finalize();
+
+                    NOTE OVER of main #red
+                        <strike>CDataIF* pData = dynamic_cast<CDataIF*>(m_data);
+                        <strike>// Start running the selection job
+                        <strike>pData->StartJobRun_JobList();
+                    END NOTE
+                    OPT <color green>!isReflectPaperThickness
+                        NOTE OVER of main #green
+                            CDataIF* pData = dynamic_cast<CDataIF*>(m_data);
+                            // Start running the selection job
+                            pData->StartJobRun_JobList();
+                        END NOTE
+                    END
+                END
+
+                NOTE OVER of main: Old implementation
+                <-[#green]-main: DEF_NONE
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.17 Reflect the paper thickness notified from UW to the current print condition when the continuous print button is pressed
+
+            participant "JobSelectGUI\CCtlJobList" as main
+            participant "JobSelectGUI\CDataIF" as data
+            participant SUnwinderManager_Callbacks as UW_Callback
+
+            -> main: OnCommand(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+            ACTIVATE main
+                NOTE OVER of main: Old implementation
+
+                ALT wParam == BN_CLICKED
+                    NOTE OVER of main: Old implementation
+                    ALT ctlWnd == m_ctl[CTRLID_BN_PRINTING]
+                        NOTE OVER of main
+                            // Check JetInspection setting
+                            bool isExistedJISetting = pData->CheckJISetting();
+                            if (isExistedJISetting){
+                            ...
+                        END NOTE
+
+                        NOTE OVER of main #white: <i>// Reflect paper thickness info which is notified from UW to the print condition of jobs.
+                        NOTE OVER of main #green
+                            bool isReflectPaperThickness = false;
+                            CIni_PrinterDescriptor iniPrinterDescriptor;
+                            iniPrinterDescriptor.Initialize(TRUE);
+                        END NOTE
+                        OPT <color green>iniPrinterDescriptor.getUnwinderOption() == 1
+                            NOTE OVER of main #green
+                                std::vector<std::string> consecutiveJobSectionIDs;
+                                SUnwinderManager_Callbacks unwinderManager_Callbacks;
+                            END NOTE
+                            main-[#green]>data++: <color green>pData->GetConsecutiveJobSectionIDList()
+                            return <color green>consecutiveJobSectionIDs
+                            ALT <color green>UnwinderManager_GetCallbacks(&unwinderManager_Callbacks)
+                                main-[#green]>UW_Callback++: <color green>unwinderManager_Callbacks.UpdateUWPaperThicknessForConsecutiveJobs\n<color green>(consecutiveJobSectionIDs, isReflectPaperThickness);
+                                return
+                            ELSE
+                                NOTE OVER of main #green
+                                    WriteToLogBuf(LOG_DEBUG, "CCtlJobList::OnCommand() 
+                                        error - Cannot get unwinder manager callback.");
+                                END NOTE
+                            END
+                        END
+                        NOTE OVER of main #red
+                            <strike>pData->ClickStartJobPressRun_JobList();
+                            <strike>pData->StartJobPressRun_JobList();
+                        END NOTE
+                        OPT <color green>!isReflectPaperThickness
+                        NOTE OVER of main #green
+                            pData->ClickStartJobPressRun_JobList();
+                            pData->StartJobPressRun_JobList();
+                        END NOTE
+                        END
+                    END
+                END
+                
+                <-[#green]-main: DEF_NONE
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.18 Check whether or not update of paper thickness value notified from UW to the current print condition is requested.
+
+            participant "CDataIF" as main
+            participant "SJobManager_Callbacks" as callback
+
+            -[#green]> main: <color green>CheckUpdateUWPaperThicknessForCurrentPrintCondition(\n<color green>long inCurrentPaperThickness, bool &outIsUpdateRequested)
+            ACTIVATE main
+                NOTE OVER of main #green
+                    bool isUpdateRequested = false;
+                    bool hasReceivedPaperInfo = false;
+                END NOTE
+                main-[#green]>main++: <color green>HasPaperInfoReceived(hasReceivedPaperInfo)
+                return
+                OPT <color green>hasReceivedPaperInfo
+                    NOTE OVER of main #green: long UWThickness = THICKNESS_INVALID_VALUE;
+                    main-[#green]>main++: <color green>GetUWPaperThickness(UWThickness)
+                    return
+
+                    ALT <color green>UWThickness != THICKNESS_INVALID_VALUE
+                        OPT <color green>inCurrentPaperThickness != UWThickness
+                            NOTE OVER of main #green
+                                std::stringstream msg;
+                                msg << ID_MESSAGE_UNWINDERMANAGER + IDM_UPDATE_PAPER_THICKNESS_TO_CURRENT_PRINT_CONDITION 
+                                    << "\n" << LoadResourceString(IDM_UPDATE_PAPER_THICKNESS_TO_CURRENT_PRINT_CONDITION, RESOURCE_MSG_STR);
+                                int result = ShowMessageBox(const_cast<char*>(msg.str().c_str()), MBST_YESNO | MBST_ICONWARNING, NULL);
+                            END NOTE
+
+                            OPT <color green>result == IDYES
+                                NOTE OVER of main #green: isUpdateRequested = true;
+                            END
+                        END
+                    ELSE
+                        NOTE OVER of main #green: WriteToLogBuf(LOG_DEBUG, "CDataIF::CheckUpdateUWPaperThicknessForCurrentPrintCondition() error - Invalid UW paper thickness value.");
+                    END
+                END
+                NOTE OVER of main #green: outIsUpdateRequested = isUpdateRequested;
+                <-[#green]-main:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.19 Update paper thickness value notified from UW to a job
+
+            participant "CDataIF" as main
+            participant "SJobManager_Callbacks" as callback
+
+            -[#green]> main: <color green>UpdateUWPaperThicknessForJob(\n<color green>const std::string &inSectionID, bool &outIsUpdateRequested)
+            ACTIVATE main
+                NOTE OVER of main #green
+                    bool isReflectPaperThickness = false;
+                    SJobManager_Callbacks jobManagerCallbacks;
+                END NOTE
+
+                ALT <color green>JM_GetCallbacks(&jobManagerCallbacks)
+                    NOTE OVER of main #green
+                        bool hasReceivedPaperInfo = false;
+                        bool isReflectUWPaperThickness = false;
+                    END NOTE
+                    main-[#green]>main++: <color green>HasPaperInfoReceived(hasReceivedPaperInfo)
+                    return
+                    OPT <color green>hasReceivedPaperInfo
+                        NOTE OVER of main #green
+                            long jobThickness;
+                            const char* jobSectionID = inSectionID.c_str();
+                        END NOTE
+                        main-[#green]>callback++: <color green>jobManagerCallbacks.JM_GetPaperThickness(jobSectionID, jobThickness)
+                        return <color green>isPaperThicknessGettingSuccess
+                        ALT <color green>isPaperThicknessGettingSuccess
+                            NOTE OVER of main #green: long UWThickness = THICKNESS_INVALID_VALUE;
+                            main-[#green]>main++: <color green>GetUWPaperThickness(UWThickness)
+                            return
+                            ALT <color green>UWThickness != THICKNESS_INVALID_VALUE
+                                OPT <color green>UWThickness != jobThickness
+                                    NOTE OVER of main #green
+                                        std::stringstream msg;
+                                        msg << ID_MESSAGE_UNWINDERMANAGER + IDM_UPDATE_PAPER_THICKNESS_TO_JOB 
+                                            << "\n" << LoadResourceString(IDM_UPDATE_PAPER_THICKNESS_TO_JOB, RESOURCE_MSG_STR);
+                                        int result = ShowMessageBox(const_cast<char*>(msg.str().c_str()), MBST_YESNO | MBST_ICONWARNING, NULL);
+                                    END NOTE
+                                    OPT <color green>result == IDYES
+                                        main-[#green]>callback++: <color green>jobManagerCallbacks.JM_SetPaperThickness(jobSectionID, UWThickness)
+                                        return <color green>isSettingSuccess
+                                        ALT <color green>isSettingSuccess
+                                            main-[#green]>callback++: <color green>jobManagerCallbacks.JM_SetPrintConditionEditFlag(jobSectionID, TRUE)
+                                            return
+                                            main-[#green]>callback++: <color green>jobManagerCallbacks.JM_SaveJobFile(jobSectionID)
+                                            return <color green>isSaveSuccess
+                                            OPT <color green>!isSaveSuccess
+                                                NOTE OVER of main #green: WriteToLogBuf(LOG_DEBUG, "CDataIF::UpdateUWPaperThicknessForJob() error - Cannot save to the job file");
+                                            END
+                                        ELSE
+                                            NOTE OVER of main #green: WriteToLogBuf(LOG_DEBUG, "CDataIF::UpdateUWPaperThicknessForJob() error - Cannot save paper thickness to job");
+                                        END
+                                    END
+                                END
+                            ELSE
+                                NOTE OVER of main #green: WriteToLogBuf(LOG_DEBUG, "CDataIF::UpdateUWPaperThicknessForJob() error - Invalid UW paper thickness value.");
+                            END
+                        ELSE
+                            NOTE OVER of main #green: WriteToLogBuf(LOG_DEBUG, "CDataIF::UpdateUWPaperThicknessForJob() error - Cannot get paper thickness of job.");
+                        END
+                    END
+                ELSE
+                    NOTE OVER of main #green: WriteToLogBuf(LOG_DEBUG, "CDataIF::UpdateUWPaperThicknessForJob() error - Cannot get job manager callback.");
+                END
+
+                NOTE OVER of main #green: outIsUpdateRequested = isReflectPaperThickness;
+
+                <-[#green]-main:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.20 Update paper thickness value notified from UW to consecutive jobs
+
+            participant "CDataIF" as main
+            participant "SJobManager_Callbacks" as callback
+
+            -[#green]> main: <color green>UpdateUWPaperThicknessForConsecutiveJobs(\n<color green>const std::vector<std::string> &inConsecutiveJobSectionIDs, \n<color green>bool &outIsUpdateRequested)
+            ACTIVATE main
+                NOTE OVER of main #green
+                    bool isReflectPaperThickness = false;
+                    SJobManager_Callbacks jobManagerCallbacks;
+                END NOTE
+                ALT <color green>JM_GetCallbacks(&jobManagerCallbacks)
+                    NOTE OVER of main #green: bool hasReceivedPaperInfo = false;
+                    main-[#green]>main++: <color green>HasPaperInfoReceived(hasReceivedPaperInfo)
+                    return
+                    OPT <color green>hasReceivedPaperInfo
+                        NOTE OVER of main #green: long UWThickness = THICKNESS_INVALID_VALUE;
+                        main-[#green]>main++: <color green>GetUWPaperThickness(UWThickness)
+                        return
+                        ALT <color green>UWThickness != THICKNESS_INVALID_VALUE
+                            NOTE OVER of main #green: long jobThickness;
+                            LOOP <color green>UINT idx = 0; idx < inConsecutiveJobSectionIDs.size(); idx++
+                                main-[#green]>callback++: <color green>jobManagerCallbacks.JM_GetPaperThickness(\n<color green>inConsecutiveJobSectionIDs.at(idx).c_str(), jobThickness)
+                                return <color green>isPaperThicknessGettingSuccess
+                                ALT <color green>isPaperThicknessGettingSuccess
+                                    OPT <color green>UWThickness != jobThickness
+                                        NOTE OVER of main #green
+                                            std::stringstream msg;
+                                            msg << ID_MESSAGE_UNWINDERMANAGER + IDM_UPDATE_PAPER_THICKNESS_TO_JOB 
+                                                << "\n" 
+                                                << LoadResourceString(IDM_UPDATE_PAPER_THICKNESS_TO_JOB, RESOURCE_MSG_STR);
+                                            int result = ShowMessageBox(const_cast<char*>(
+                                                msg.str().c_str()), MBST_YESNO | MBST_ICONWARNING, NULL);
+                                        END NOTE
+                                        OPT <color green>result == IDYES
+                                            NOTE OVER of main #green: isReflectPaperThickness = true;
+                                        END
+                                        NOTE OVER of main #green: break;
+                                    END
+                                ELSE
+                                    NOTE OVER of main #green
+                                        WriteToLogBuf(LOG_DEBUG, "CDataIF::UpdateUWPaperThicknessForConsecutiveJobs() error 
+                                        - Cannot get paper thickness of job.");
+                                    END NOTE
+                                END
+                            END LOOP
+
+                            OPT <color green>isReflectPaperThickness
+                                LOOP <color green>UINT idx = 0; idx < inConsecutiveJobSectionIDs.size(); idx++
+                                    NOTE OVER of main #green: const char* sectionID = inConsecutiveJobSectionIDs.at(idx).c_str();
+                                    main-[#green]>callback++: <color green>jobManagerCallbacks.JM_GetPaperThickness(\n<color green>sectionID, jobThickness)
+                                    return <color green>isGettingSuccess
+                                    ALT <color green>isGettingSuccess
+                                        OPT <color green>UWThickness != jobThickness
+                                            main-[#green]>callback++: <color green>jobManagerCallbacks.JM_SetPaperThickness(\n<color green>sectionID, UWThickness)
+                                            return <color green>isSettingSuccess
+                                            ALT <color green>isSettingSuccess
+                                                main-[#green]>callback++: <color green>jobManagerCallbacks.JM_SetPrintConditionEditFlag(\n<color green>sectionID, TRUE)
+                                                return
+                                                main-[#green]>callback++: <color green>jobManagerCallbacks.JM_SaveJobFile(sectionID)
+                                                return <color green>isSaveSuccess
+                                                OPT <color green>!isSaveSuccess
+                                                    NOTE OVER of main #green
+                                                        WriteToLogBuf(LOG_DEBUG, "CDataIF::UpdateUWPaperThicknessForConsecutiveJobs() error 
+                                                            - Cannot save to the job file");
+                                                    END NOTE
+                                                END
+                                            ELSE
+                                                NOTE OVER of main #green
+                                                    WriteToLogBuf(LOG_DEBUG, "CDataIF::UpdateUWPaperThicknessForConsecutiveJobs() error 
+                                                        - Cannot save paper thickness to job");
+                                                END NOTE
+                                            END
+                                        END
+                                    ELSE
+                                        NOTE OVER of main #green
+                                            WriteToLogBuf(LOG_DEBUG, "CDataIF::UpdateUWPaperThicknessForConsecutiveJobs() error 
+                                                - Cannot get paper thickness of job.");
+                                        END NOTE
+                                    END
+                                END LOOP
+                            END
+                        ELSE
+                            NOTE OVER of main #green
+                                WriteToLogBuf(LOG_DEBUG, "CDataIF::UpdateUWPaperThicknessForConsecutiveJobs() error 
+                                    - Invalid UW paper thickness value.");
+                            END NOTE
+                        END
+                    END
+                ELSE
+                    NOTE OVER of main #green
+                        WriteToLogBuf(LOG_DEBUG, "CDataIF::UpdateUWPaperThicknessForConsecutiveJobs() error 
+                            - Cannot get Job manager callback.");
+                    END NOTE
+                END
+                
+                NOTE OVER of main #green: outIsUpdateRequested = isReflectPaperThickness;
+
+                <-[#green]-main:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.21 Get a list of consecutive job section IDs
+
+            participant "JobSelectGUI\CDataIF" as main
+            participant "JobSelectGUI\JobListData" as jobListData
+
+            -[#green]> main: <color green>GetConsecutiveJobSectionIDList(void)
+            ACTIVATE main
+                main-[#green]>jobListData++: <color green>m_JobListData->GetConsecutiveJobSectionIDList(void)
+                    NOTE OVER of jobListData #green
+                        std::vector<std::string> consecutiveJobSectionIDList = {};
+                        long currentListJobCount = m_CurrentItems->getJobNum();
+                    END NOTE
+                    OPT  <color green>currentListJobCount <= 0
+                        main<-[#green]-jobListData: <color green>consecutiveJobSectionIDList
+                    END
+                    NOTE OVER of jobListData #green
+                        std::list<bool> isConsecutiveJobs;
+                        long index = 0;
+                        std::string sectionID;
+                    END NOTE
+                    jobListData-[#green]>jobListData++: <color green>CheckConsecutiveJob(m_CurrentItemIndx, currentListJobCount, isConsecutiveJobs);
+                    return <color green>isConsecutiveJobs
+                    LOOP  <color green>auto isConsecutive = isConsecutiveJobs.cbegin(); isConsecutive != isConsecutiveJobs.cend(); ++isConsecutive
+                        ALT  <color green>*isConsecutive == false
+                            NOTE OVER of jobListData #green: break;
+                        ELSE
+                            NOTE OVER of jobListData #green
+                                sectionID = m_CurrentItems->getSectionID(index);
+                                consecutiveJobSectionIDList.push_back(sectionID);
+                            END NOTE
+                        END
+                        NOTE OVER of jobListData #green: ++index;
+                    END LOOP
+                    return <color green>consecutiveJobSectionIDList
+                <--main: <color green>consecutiveJobSectionIDList
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.22 Notify main thread to update timer when receiving SignalStatus(PAPER)
+
+            participant "CRequestUnwinderThread" as main
+
+            -[#green]> main++: <color green>MsgSetTimerPaperReceive()
+                NOTE OVER of main #green
+                    PostThreadMessage(m_thread.thread_id, WM_USER_SET_PAPERINFO_TIMER);
+                END NOTE
+            return
+
+            -[#green]> main++: <color green>CheckEvents()
+                NOTE over main
+                    Other processing
+                    ret = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+                END NOTE
+                ALT <color green> msg == WM_USER_SET_PAPERINFO_TIMER
+                    main-[#green]> main++: <color green>SetTimerPaperReceive()
+                        REF over main: <color green>Refer to <b>205.11
+                    return
+                END
+                 NOTE over main
+                    Other processing
+                END NOTE
+            return <color green>
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.23 Status bar window message procedure
+
+            participant "StatusBar\CDataIF" as main
+
+            -> main: UI_Proc(HWND hWnd, \n              UINT message, WPARAM wParam, LPARAM lParam)
+            ACTIVATE main
+                NOTE OVER of main: Old implementation
+
+                ALT <color green>message == UWM_STATUSBAR_UW_STATUS_ON
+                    main -[#green]>main++: <color green>SetUWStatus(UW_STATUS_ON)
+                    return
+                ELSE <color green>message == UWM_STATUSBAR_UW_STATUS_OFF
+                    main -[#green]>main++: <color green>SetUWStatus(UW_STATUS_OFF)
+                    return
+                END
+                <--main: DEF_NONE
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.24 Set the unwinder control's property
+
+            participant "StatusBar\CCtlWarningIconAndUW" as main
+
+            -[#green]> main: <color green>OnSetAttribute()
+            ACTIVATE main
+                NOTE OVER of main #green
+                    HBITMAP unwinder_bmp = LoadResourceBitmap(IDB_UW_STATUS, RESOURCE_BMP);
+                    //Calculate the controls' position
+                    BITMAP unwinder;
+                    ::GetObject(unwinder_bmp, sizeof(BITMAP), &unwinder);
+                    int unwinder_w = unwinder.bmWidth;
+                    int unwinder_left = DEF_W_SCREEN - unwinder_w - 9;
+                END NOTE
+                NOTE OVER of main #green
+                    // Unwinder control
+                    long ctlId = CTRLID_ST_UW;
+                    m_ctlAttribute[ctlId].type = CT_STATICBOX;
+                    m_ctlAttribute[ctlId].style = CST_HIDE | SCST_NORMAL | SCST_BITMAP | SCST_UNITED_IMAGE | SCST_IMAGE_BLEND;
+                    m_ctlAttribute[ctlId].text = NULL;
+                    SetRect(&m_ctlAttribute[ctlId].rect, unwinder_left, 6, unwinder_left + unwinder_w, 6 + DEF_H_UW_CONTROL);
+                    m_ctlAttribute[ctlId].param = (DWORD)unwinder_bmp;
+                END NOTE
+                
+                NOTE OVER of main #green
+                    // Paper remaining amount control
+                    long ctlId = CTRLID_ST_PAPER_REMAINING;
+                    m_ctlAttribute[ctlId].type = CT_STATICBOX;
+                    m_ctlAttribute[ctlId].style = CST_HIDE | SCST_NORMAL | SCST_TEXT | SCST_CENTER;
+                    m_ctlAttribute[ctlId].text = NULL;
+                    SetRect(&m_ctlAttribute[ctlId].rect, 0, DEF_H_UW_CONTROL - 39, 50, DEF_H_UW_CONTROL - 39 + 22);
+                    m_ctlAttribute[ctlId].param = NULL;
+                    m_ctlAttribute[ctlId].ownerID = CTRLID_ST_UW;
+                END NOTE
+
+                NOTE OVER of main #green
+                    // warning icon x6
+                    for (int nCtl = CTRLID_SC_WARNING_ICON1; nCtl <= CTRLID_SC_WARNING_ICON6; ++nCtl) {
+                        m_ctlAttribute[nCtl].type = CT_STATICBOX;
+                        m_ctlAttribute[nCtl].style = CST_HIDE | SCST_OWNER_DRAW | SCST_BITMAP | SCST_UNITED_IMAGE | SCST_IMAGE_BLEND;
+                        m_ctlAttribute[nCtl].text = NULL;
+                        m_ctlAttribute[nCtl].param = NULL;
+                        m_ctlAttribute[nCtl].ownerID = CTRLID_ST_UW;
+                        int ctlIconIdx = nCtl - CTRLID_SC_WARNING_ICON1;
+                        SetRect(&m_ctlAttribute[nCtl].rect, unwinder_w - DEF_W_WARNING_CONTROL - 6, 
+                            8 + H_ICON * ctlIconIdx, unwinder_w - DEF_W_WARNING_CONTROL - 6 + W_ICON, 8 + H_ICON * ctlIconIdx + H_ICON);
+                    }
+                END NOTE
+
+                NOTE OVER of main #green
+                    // warning text x6
+                    for (int nCtl = CTRLID_SC_WARNING_TEXT1; nCtl <= CTRLID_SC_WARNING_TEXT6; ++nCtl) {
+                        m_ctlAttribute[nCtl].type = CT_STATICBOX;
+                        m_ctlAttribute[nCtl].style = CST_HIDE | SCST_NORMAL | SCST_TEXT | SCST_LEFT;
+                        m_ctlAttribute[nCtl].text = NULL;
+                        m_ctlAttribute[nCtl].param = NULL;
+                        m_ctlAttribute[nCtl].ownerID = CTRLID_ST_UW;
+                        int ctlTextIdx = nCtl - CTRLID_SC_WARNING_TEXT1;
+                        SetRect(&m_ctlAttribute[nCtl].rect, unwinder_w - DEF_W_WARNING_CONTROL - 6 + W_ICON + 5, 
+                            8 + H_TEXT * ctlTextIdx, unwinder_w - DEF_W_WARNING_CONTROL - 6 + W_ICON + 5 + W_TEXT, 8 + H_TEXT * ctlTextIdx + H_TEXT);
+                    }
+                END NOTE
+                <-[#green]-main:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.25 Events that set the properties of the control
+
+            participant "StatusBar\CCtlWarningIconAndUW" as main
+
+            -[#green]> main: <color green>OnCreateItem()
+            ACTIVATE main
+                REF OVER main: <i>Refer to OnCreateItem method in CCtlWarningIcon class.
+                <-[#green]-main:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.26 Window procedure
+
+            participant "StatusBar\CCtlWarningIconAndUW" as main
+
+            -[#green]> main: <color green>Proc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+            ACTIVATE main
+                REF OVER main: <i>Refer to Proc method in CCtlWarningIcon class.
+                <-[#green]-main:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.27 Update unwinder control display value
+
+            participant "StatusBar\CCtlWarningIconAndUW" as main
+            participant "StatusBar\CDataIF" as data
+            participant "SUnwinderManager_Callbacks" as callbacks
+
+            -[#green]> main: <color green>OnUpdateValue()
+            ACTIVATE main
+                NOTE RIGHT of main #white: UW icon and paper remaining amount part
+                NOTE OVER of main #green
+                    CDataIF* pData = dynamic_cast<CDataIF*>(m_data);
+                    int UWStatus_unitedImageCount = 10;
+                    long paperRemaining = -1;
+                    int imageIndex;
+                END NOTE
+
+                main-[#green]>data++: <color green>GetUWStatus()
+                return <color green>UWStatus 
+
+                ALT <color green>UWStatus == UW_STATUS_ON
+                    NOTE OVER of main #green: imageIndex = 0;
+                ELSE <color green>UWStatus == UW_STATUS_OFF
+                    NOTE OVER of main #green: imageIndex = 9;
+                END
+
+                NOTE OVER of main #green
+                    SCITEMINFO sc_item = { 0 };
+                    sc_item.nUnitedImageCount = UWStatus_unitedImageCount;
+                    sc_item.nUnitedImageIndex = imageIndex;
+                    SetControlItem(m_ctl[CTRLID_ST_UW_STATUS], 0, &sc_item);
+                    SUnwinderManager_Callbacks unwinderManager_Callbacks;
+                END NOTE
+
+                OPT <color green>UnwinderManager_GetCallbacks(&unwinderManager_Callbacks)
+                    main-[#green]>callbacks++: <color green>unwinderManager_Callbacks.GetUWPaperRemaingAmount(paperRemaining)
+                    return 
+                END
+                NOTE OVER of main #green: char strPaperRemaining[128] = { 0 };
+                ALT <color green>paperRemaining == -1
+                    NOTE OVER of main #green
+                        _snprintf_s(strPaperRemaining, _TRUNCATE, "%d", 0);
+                        WriteToLogBuf(LOG_DEBUG, "CCtlWarningIconAndUW::OnUpdateValue() error - Invalid value of paper remaining amount.");
+                    END NOTE
+                ELSE
+                    NOTE OVER of main #green
+                        long paperRemainingInMeter = ConvertUnit(paperRemaining, DEF_LENGTH_POINT, DEF_LENGTH_MM) / 1000;
+                        _snprintf_s(strPaperRemaining, _TRUNCATE, "%d", paperRemainingInMeter);
+                    END NOTE
+                END
+                NOTE OVER of main #green: SetControlData(m_ctl[CTRLID_ST_PAPER_REMAINING], (DWORD)strPaperRemaining);
+
+                NOTE RIGHT of main #white: //Warning message part
+                NOTE OVER of main #green
+                    DEF_PRINTER_WARNING printerWarning = DEF_PRINTER_WARNING_NONE;	//!< type warning icon
+	                std::string strMessage;	//!< message warning
+                END NOTE
+
+                LOOP <color green>int nIndex = 1; nIndex <= DEF_MAX_DISPLAY_WARNING; ++nIndex
+                    NOTE OVER of main #green: BOOL bFlag = pData->GetPrinterWarning(nIndex, &printerWarning, strMessage);
+                    ALT <color green>!bFlag || printerWarning == DEF_PRINTER_WARNING_NONE
+                        NOTE OVER of main #green
+                            SetControlData(m_ctl[CTRLID_SC_WARNING_ICON1 + nIndex - 1], NULL);
+			                SetControlData(m_ctl[CTRLID_SC_WARNING_ICON1 + nIndex - 1 + DEF_MAX_DISPLAY_WARNING], NULL);
+                        END NOTE
+                    ELSE
+                        NOTE OVER of main #green
+                            // Displays the printer status with an icon
+                            SetControlData(m_ctl[CTRLID_SC_WARNING_ICON1 + nIndex - 1], 
+                                (DWORD)LoadResourceBitmap(IDB_WARNING_ICON_ZZ, RESOURCE_BMP));
+                            SCITEMINFO sc_item = { 0 };
+                            sc_item.nUnitedImageCount = DEF_PRINTER_WARNING_BARCODE_COLLATION_MISMATCH;
+                            sc_item.nUnitedImageIndex = DEF_PRINTER_WARNING_BARCODE_COLLATION_MISMATCH - printerWarning;
+                            SetControlItem(m_ctl[CTRLID_SC_WARNING_ICON1 + nIndex - 1], 0, &sc_item);
+
+                            // Displays the printer status with a text
+                            SetControlData(m_ctl[CTRLID_SC_WARNING_ICON1 + nIndex - 1 + DEF_MAX_DISPLAY_WARNING], (DWORD)strMessage.c_str());
+                        END NOTE
+                    END
+                END LOOP
+
+                <-[#green]-main:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.28 Update unwinder control status update event
+
+            participant "StatusBar\CCtlWarningIconAndUW" as main
+            participant "StatusBar\CDataIF" as data
+
+            -[#green]> main: <color green>OnUpdateState()
+            ACTIVATE main
+                OPT <color green>m_ctl
+                    NOTE RIGHT of main #white: // update status for the UW controls
+                    NOTE OVER of main #green
+                        CDataIF* pData = dynamic_cast<CDataIF*>(m_data);
+                        DWORD dwUWState = CST_SHOW;
+                        CIni_PrinterDescriptor iniPrinterDescriptor;
+                        iniPrinterDescriptor.Initialize(TRUE);
+                    END NOTE
+                    OPT <color green>iniPrinterDescriptor.getUnwinderOption() != 1
+                        NOTE OVER of main #green: dwUWState = CST_HIDE;
+                    END
+                    NOTE OVER of main #green: SetControlState(m_ctl[CTRLID_ST_UW], dwUWState);
+
+                    main-[#green]>data++: <color green>pData->GetUWStatus()
+                    return <color green>uwStatus
+                    OPT <color green>uwStatus == UW_STATUS_OFF
+                        NOTE OVER of main #green: dwUWState = CST_HIDE;
+                    END
+                    NOTE OVER of main #green: SetControlState(m_ctl[CTRLID_ST_PAPER_REMAINING], dwUWState);
+
+                    NOTE RIGHT of main #white: // update status for the warning controls
+                    NOTE OVER of main #green
+                        DWORD dwWarningState = CST_SHOW;
+                        DEF_PRINTER_WARNING printerWarning = DEF_PRINTER_WARNING_NONE;	//!< type warning icon
+                        std::string strMessage;	//!< message warning
+                    END NOTE
+
+                    LOOP <color green>int index = 1; index <= DEF_MAX_DISPLAY_WARNING; ++index
+                        OPT <color green>pData->IsDisplayDateAndTime() \n<color green>&& index >= (DEF_MAX_DISPLAY_WARNING - 1)
+                            NOTE OVER of main #green: dwWarningState = CST_HIDE;
+                        END
+                        NOTE OVER of main #green: BOOL bFlag = pData->GetPrinterWarning(index, &printerWarning, strMessage);
+                        OPT <color green>!bFlag || printerWarning == DEF_PRINTER_WARNING_NONE
+                            NOTE OVER of main #green: dwWarningState = CST_HIDE;
+                        END
+                        NOTE OVER of main #green
+                            SetControlState(m_ctl[CTRLID_SC_WARNING_ICON1 + index - 1], dwWarningState);
+                            SetControlState(m_ctl[CTRLID_SC_WARNING_ICON1 + index - 1 + DEF_MAX_DISPLAY_WARNING], dwWarningState);
+                        END NOTE
+                    END LOOP
+                END
+                <-[#green]-main:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 205.29 Set data and time control's property
+
+            participant "StatusBar\CCtlDateAndTime" as main
+
+            -> main: OnSetAttribute()
+            ACTIVATE main
+                NOTE OVER of main #green
+                    CIni_PrinterDescriptor iniPrinterDescriptor;
+                    iniPrinterDescriptor.Initialize(TRUE);
+                END NOTE
+
+                NOTE OVER of main
+                    long ctlId = CTRLID_TIME;
+                    m_ctlAttribute[ctlId].type = CT_STATICBOX;
+                    m_ctlAttribute[ctlId].style = CST_HIDE | SCST_NORMAL | SCST_TEXT | SCST_RIGHT;
+                    m_ctlAttribute[ctlId].text = NULL;
+                END NOTE
+                NOTE OVER of main #red: <strike>SetRect(&m_ctlAttribute[ctlId].rect, 1782, 105, 1782 + 120, 105+24);
+                ALT <color green>iniPrinterDescriptor.getUnwinderOption() == 1
+                    NOTE OVER of main #green: SetRect(&m_ctlAttribute[ctlId].rect, 1800, 105, 1800 + 103, 105 + 24);
+                ELSE 
+                    NOTE OVER of main #green: SetRect(&m_ctlAttribute[ctlId].rect, 1782, 105, 1782 + 120, 105+24);
+                END
+
+                NOTE OVER of main
+                    long ctlId = CTLID_DATE;
+                    m_ctlAttribute[ctlId].type = CT_STATICBOX;
+                    m_ctlAttribute[ctlId].style = CST_HIDE | SCST_NORMAL | SCST_TEXT | SCST_RIGHT;
+                    m_ctlAttribute[ctlId].text = NULL;
+                END NOTE
+                NOTE OVER of main #red: <strike>SetRect(&m_ctlAttribute[ctlId].rect, 1782, 127, 1782 + 120, 127+24);
+                ALT <color green>iniPrinterDescriptor.getUnwinderOption() == 1
+                    NOTE OVER of main #green: SetRect(&m_ctlAttribute[ctlId].rect, 1800, 127, 1800 + 103, 127 + 24);
+                ELSE 
+                    NOTE OVER of main #green: SetRect(&m_ctlAttribute[ctlId].rect, 1782, 127, 1782 + 120, 127 + 24);
+                END
+                
+                NOTE OVER of main #green: iniPrinterDescriptor.Finalize();
+                <--main:
+            DEACTIVATE main
+            @enduml
+
+**206. Processing according to UW status**
+---------------------------------------------------
+    **1. Description**
+        | If there is no response from the UW for the notification channel opening result after the controller registers the status monitoring channel, it is determined that the UW has not started.
+        | Or, if there is no status notification from the UW at the interval specified by the controller when registering the status monitoring channel +α seconds, it is determined that the UW has not started.
+        | +α seconds are defined in the TP-UW_Communication.ini file
+
+        206-1. If UW is not started when the controller is started
+            | ・Display the translucent UW icon(Top icon of UW2.bmp).
+        206-2. When UW ends while the controller is starting
+            | ・The following warning message dialog is displayed.
+            | (Ja)UWとの通信エラーが発生しました。
+            | (En) A communication error with UW has occurred.
+            | ・Display the translucent UW icon(Top icon of UW2.bmp)
+
+        206-3. When UW starts while the controller is starting
+            | ・Set the print condition information of the current print condition and register the channel for paper information notification.
+            | ・Cancel the 206-1 warning icon display.
+            | ・Switch from the translucent UW icon (Top icon of UW2.bmp) of the UW icon to the normal UW icon.
+
+    **2. Solution**
+
+        - Add resource into strings_UnwinderManager.ini file to display UW status warning dialog
+
+        .. code-block:: ini
+            :caption: Resource\\English\\strings_UnwinderManager.ini
+
+            [MSG]
+            IDM_NOTIFY_UW_STATUS = A communication error with UW has occurred.
+
+        .. code-block:: ini
+            :caption: Resource\\Japanese\\strings_UnwinderManager.ini
+            
+            [MSG]
+            IDM_NOTIFY_UW_STATUS = UW との通信エラーが発生しました。
+
+        
+
+
+        - In class CDataIF, create member variables and method to handle display the UW status.
+
+        .. code-block:: c++
+            :caption: Src\\UnwinderManager\DataIF.h
+
+            class CDataIF : public CBaseDataIF,
+            public CMakeComposeUnwinderData
+            {
+            public:
+                /...
+
+                //methods
+                void UpdateDisplayUWStatus(bool inUWstatus);
+
+            protected:
+
+                // members
+                bool m_displayWarningDialogEnable;
+            }
+
+        - In file Common\\CommonUiMsg_OP.h, add new messages in enum for UW status
+
+        .. code-block:: c++
+            :caption: Common\\CommonUiMsg_OP.h
+
+            // before
+            enum
+            {
+
+                //...
+                UWM_ADJUSTMENTGUI_CLOSE_DIALOG,         //!< Adjustment screen (Alignment/Shading/HeadCleaning) closes when running job is not existed
+
+                //
+                UWM_OP_MAX_COUNT
+            };
+
+            // after
+            enum
+            {
+
+                //...
+                UWM_ADJUSTMENTGUI_CLOSE_DIALOG,         //!< Adjustment screen (Alignment/Shading/HeadCleaning) closes when running job is not existed
+
+                UWM_STATUSBAR_UW_STATUS_ON,             //!< UW status is online, then notify to display normal UW icon
+                UWM_STATUSBAR_UW_STATUS_OFF,            //!< UW status is offine, then notify to display translucent UW icon
+
+                //
+                UWM_OP_MAX_COUNT
+            };
+
+        - In method CDataIF::UpdateDisplayUWStatus(), post a message about UW status and display the warning dialog when UW is offline
+        - In method CRequestUnwinderThread::CheckReceiverRunning(), if UWandRW_Receiver.exe is not run, call method UpdateDisplayUWStatus(false) to display UW is offline
+        - In method CRequestUnwinderThread::CheckUWStatus(), 
+            + If receive the response from UW successfully, call method UpdateDisplayUWStatus(true) to display UW is online
+            + Else, call method UpdateDisplayUWStatus(false) to display UW is offline
+        - In method CReceiveSignalStatus::ReceiveStatusInfo:
+            + Stop the current timeout timer and start a new one.
+            + Set the UW status into UnwinderManager_work.ini file.
+            + call method UpdateDisplayUWStatus(true) to display UW is online
+        - In class CRequestUnwinderThread, add function to delete/set timer to check signal timeout.
+            .. code-block:: C++
+                :caption: RequestUnwinderThread.h
+
+                #define WM_USER_SET_STATUS_TIMER		WM_USER+100
+                class CRequestUnwinderThread
+                {
+                    ...
+                    // sent msg from ReceiveSignalStatus thread
+	                void MsgSetTimerStatusReceive();
+                    // setting for timeout timer of SignalStatus(STATUS)
+                    void SetTimerStatusReceive();
+                    // stop timeout timer of SignalStatus(STATUS)
+                    void KillTimerStatusReceive();
+                    ...
+                }
+
+    **3. Detail implementation**
+
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 206.1 Check UW status when starting control
+
+            participant CRequestUnwinderThread as main
+            participant CDataIF as data
+
+            -[#green]> main: <color green>CheckReceiverRunning()
+            ACTIVATE main
+                REF OVER main: <color green>Refer to <b>201.2
+                OPT <color green> !isReceiverRunning
+                    main-[#green]>data++:<color green>UpdateDisplayUWStatus(false)
+                            REF OVER data: <color green>Refer to <b>206.4
+                    return
+                    REF OVER main: <color green>Refer to <b>201.2
+                END
+            <-[#green]-main: <color green>:
+            DEACTIVATE main
+
+            -[#green]> main: <color green>CheckUWStatus()
+            ACTIVATE main
+                REF OVER main: <color green>Refer to <b>202.1
+                main-[#green]>main++:<color green> RequestQueryStatus();
+                return <color green>result
+                OPT <color green> result.find("[SUCCESS]") == std::string::npos
+                    main-[#green]>data++:<color green>UpdateDisplayUWStatus(false)
+                        REF OVER data: <color green> Refer to <b>206.4
+                    return
+                END
+                LOOP <color green> result.find("[SUCCESS]") == std::string::npos
+                    REF OVER main: <color green>Refer to <b>202.1
+                END
+
+                REF OVER main: <color green>Refer to <b>202.1
+
+            <-[#green]-main: <color green>:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 206.2 Receive status info
+
+            participant CReceiveSignalStatus as main
+            participant CRequestUnwinderThread as request
+            participant CDataIF as data
+
+            main->request++: <color green>MsgSetTimerStatusReceive()
+                REF over request: <color green>Refer to <b>206.3
+            return
+            NOTE OVER of main #green
+                Ini_UnwinderManager_work iniUnwinderManager_work;
+                iniUnwinderManager_work.Initialize(TRUE);
+                iniUnwinderManager_work.putUnwinderStatus(inStatus);
+            END NOTE
+            main-[#green]>data++:<color green>UpdateDisplayUWStatus(true)
+                REF over data: <color green>Refer to <b>206.4
+            return
+            <-[#green]-main: <color green> TRUE
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 206.3 Notify main thread to update timer when receiving SignalStatus(STATUS)
+
+            participant "CRequestUnwinderThread" as main
+
+            -[#green]> main++: <color green>MsgSetTimerStatusReceive()
+                NOTE OVER of main #green
+                    PostThreadMessage(m_thread.thread_id, WM_USER_SET_STATUS_TIMER);
+                END NOTE
+            return
+
+            -[#green]> main++: <color green>CheckEvents()
+                NOTE over main
+                    Other processing
+                    ret = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+                END NOTE
+                ALT <color green> msg == WM_USER_SET_STATUS_TIMER
+                    main-[#green]> main++: <color green>SetTimerStatusReceive()
+                        REF over main: <color green> Refer to <b>206.5
+                    return
+                END
+                 NOTE over main
+                    Other processing
+                END NOTE
+            return <color green>
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 206.4 Update display the UW status (in plugin UnwinderManager)
+            participant CDataIF as main
+
+            -[#green]> main: <color green>UpdateDisplayUWStatus(inUWStatus)
+            ACTIVATE main
+            ALT <color green>true == inUWStatus
+                NOTE OVER of main #green
+                    PostMessage(GetStatusBarWindow(), UWM_STATUSBAR_UW_STATUS_ON, NULL, NULL);
+                    m_displayWarningDialogEnable = true;
+                END NOTE
+            ELSE 
+                NOTE OVER of main #green
+                    PostMessage(GetStatusBarWindow(), UWM_STATUSBAR_UW_STATUS_OFF, NULL, NULL);
+                END NOTE
+                OPT <color green> m_displayWarningDialogEnable
+                    NOTE OVER of main #green
+                        char erroMsg[512] = {0};
+                        _snprintf(erroMsg, sizeof(erroMsg) - 1, "%d\n%s", 
+                            (ID_MESSAGE_UNWINDERMANAGER + IDM_NOTIFY_UW_STATUS), 
+                            (char*)LoadResourceString(IDM_NOTIFY_UW_STATUS, RESOURCE_MSG_STR));
+                        ShowMessageBox(erroMsg, MBST_ICONERROR | MBST_OK | MBST_MODELESS, NULL);
+                        m_displayWarningDialogEnable = false;
+                    END NOTE 
+                END
+            END 
+
+            <-[#green]-main: <color green>:
+            DEACTIVATE main
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 206.5 Setting for timeout timer of SignalStatus(STATUS)
+
+            participant CRequestUnwinderThread as main
+            participant CMakeComposeUnwinderData as data
+            participant CIni_UnwinderManager as ini
+
+            -[#green]> main++: <color green>SetTimerStatusReceive()
+                main-[#green]>data++: <color green>GetTimeoutTimerStatus()
+                    data-[#green]>ini++:<color green>getQueryStatus_RepeatTime()
+                    return <color green>time1
+                    data-[#green]>ini++:<color green>getSignalstatus_Timeout_Judegment_Waittime()
+                    return <color green>time2
+                    NOTE over data #green
+                        nTimeout = (time1 + time2) * 1000;
+                    END NOTE
+                return <color green>nTimeout
+                NOTE over main #green
+                    m_StatusReceivingTimeId = SetTimer(NULL, m_StatusReceivingTimeId, nTimeout, NULL);
+                END NOTE
+                return
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 206.6 Handle when receive UW status is timeout
+
+            participant CRequestUnwinderThread as main
+            participant CReceiveSignalStatusThread as thread
+            participant CDataIF as data
+
+            -[#green]> main++: <color green>CheckEvents()
+                NOTE over main
+                    Other processing
+                    ret = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+                END NOTE
+                ALT <color green> msg == WM_TIMER
+                    ALT <color green>msg.wParam == m_StatusReceivingTimeId
+                        main-[#green]>thread++: <color green>EndThread(false)
+                        return
+                        main-[#green]>main++: <color green>KillTimerStatusReceive()
+                            REF over main: <color green>Refer to <b>206.7
+                        return
+                        main-[#green]>data++: <color green>UpdateDisplayUWStatus(false)
+                        return
+                    END
+                END
+                 NOTE over main
+                    Other processing
+                END NOTE
+            return <color green>
+            @enduml
+
+        ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 206.7 Stop timeout timer of SignalStatus(STATUS)
+
+            participant CRequestUnwinderThread as main
+
+            -[#green]> main: <color green>KillTimerStatusReceive()
+            ACTIVATE main
+                NOTE OVER of main #green
+                    KillTimer(NULL, m_StatusReceivingTimeId);
+                    m_StatusReceivingTimeId = 0;
+                END NOTE
+                <-[#green]-main:
+            DEACTIVATE main
+            @enduml
+
+**207. Delete channel**
+-------------------------
+    **1. Description**
+        | The communication channel is deleted by the channel ID notified in the response at the time of channel registration at the following timing.
+        | - When channel information is already registered in the TP-UW_Communication_work.ini file at the time of channel registration(Described in 202).
+        | - When Signal Status notifications for the status notification channel or paper information notification channel can no longer be received (at this time, a reconnection request is required from the controller (described later in 208)).
+        | - When StopPresChParams is sent (sent when the controller ends)
+
+
+    **2. Solution**
+        - In CRequestUnwinderThread::ThreadProc(), check for existing channel IDs in TP-UW_Communication_work.ini and delete them.
+        - In CRequestUnwinderThread::CheckEvents(), when WM_TIMER message is received, delete the channel IDs in TP-UW_Communication_work.ini.
+        - In CRequestUnwinderThread::ThreadProc(), wait for process "UWandRW_Receiver.exe" to end or m_ExitThread set. (see 201.1 Main flow)
+        - Call to RequestStopPersChParams() for channel which has been registered.
+        - If m_ExitThread not set yet, repeat the main loop. (see 201.1 Main flow)
+
+    **3. Detail implementation**
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 207.1 Delete channels when controller starts
+
+            participant CRequestUnwinderThread as main
+            participant CRequestUnwinder as req
+            participant CIni_UnwinderManager_work as ini
+            -[#green]> main++: <color green>ThreadProc()
+                main-[#green]> ini++: <color green>() getQueryStatus_CannelID()
+                return <color green> ret
+                OPT <color green> ret != ""
+                    main-[#green]> ini++: <color green>putStatusCannelID("")
+                    return
+                END
+                main-[#green]> ini++: <color green>() getQueryResource_CannelID()
+                return <color green> ret
+                OPT <color green> ret != ""
+                    main-[#green]> ini++: <color green>putResourceCannelID("")
+                    return
+                END
+                NOTE over main: Other processing
+            return
+            @enduml
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 207.2 Delete channels when not receiving signal status
+
+            participant CRequestUnwinderThread as main
+            participant CRequestUnwinder as req
+            participant CIni_UnwinderManager_work as ini
+            -[#green]> main++: <color green>CheckEvents()
+            NOTE over main: Other processing
+                ALT <color green> msg == WM_TIMER
+                    ALT <color green>msg.wParam == m_PaperReceivingTimeId || msg.wParam == m_StatusReceivingTimeId
+                        main-[#green]> ini++: <color green>putStatusCannelID("")
+                        return
+                        main-[#green]> ini++: <color green>putResourceCannelID("")
+                        return
+                    END
+                END
+            NOTE over main: Other processing
+            return
+            @enduml
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 207.3 Delete channels when controller ends
+
+            participant CRequestUnwinderThread as main
+            participant CRequestUnwinder as req
+            participant CIni_UnwinderManager_work as ini
+            -[#green]> main++: <color green>Cleanup()
+                OPT <color green> m_StatusRequested == true
+                    main-[#green]> req++: <color green>RequestStopPersChParams(E_Compose_QueryStatus)
+                        NOTE over req: Other processing
+                        req-[#green]> ini++: <color green>putStatusCannelID("")
+                        return
+                    return
+                    NOTE over main #green
+                        m_StatusRequested = false;
+                        END NOTE
+                    END
+                OPT <color green> m_ResourceRequested == true
+                    main-[#green]> req++: <color green>RequestStopPersChParams(E_Compose_QueryResource)
+                        NOTE over req: Other processing
+                        req-[#green]> ini++: <color green>putResourceCannelID("")
+                        return
+                    return
+                    NOTE over main #green
+                        m_ResourceRequested = false;
+                    END NOTE
+                    END
+            return
+            @enduml
+
+**208. Channel reconnection request**
+---------------------------------------
+    **1. Description**
+        | Issue a UWPing confirmation timer when SignalStatus notifications for the status notification channel or paper information notification channel can no longer be received.
+        | If Ping passes, channel registration will be performed (until channel registration is possible).
+
+    **2. Solution**
+        - In CRequestUnwinderThread::CheckEvents(), when WM_TIMER event happens, which means SignalStatus wasn't received on time, end CReceiveSignalStatusThread and return, then the outer loop in CRequestUnwinderThread::ThreadProc() will repeat the registration process. (Refer to diagram 201.1)
+        - In function CRequestUnwinder::ExecuteSendToUnwinder(), get SEND_RETRY_COUNT and SEND_RETRY_INTERVAL values from TP-UW_Communication.ini.
+        - If sending XML fail, repeat until successfully or SEND_RETRY_COUNT times, each time waits SEND_RETRY_INTERVAL milliseconds.
+  
+    **3. Detail implementation**
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 208.1 when SignalStatus is not received
+
+            participant CRequestUnwinderThread as main
+            participant CReceiveSignalStatusThread as server
+            -[#green]> main++: <color green>CheckEvents()
+            NOTE over main: Other processing
+                ALT <color green> msg == WM_TIMER
+                    ALT <color green>msg.wParam == m_PaperReceivingTimeId || msg.wParam == m_StatusReceivingTimeId
+                    NOTE over main #green
+                        m_StatusRequested = false;
+                        m_ResourceRequested = false;
+                    END NOTE
+                    main-[#green]>server++: <color green>EndThread()
+                        REF over server: <color green>Refer to <b>205.2
+                    return
+                    <-[#green]-main
+                    END
+                END
+            NOTE over main: Other processing
+            return
+            @enduml
+
+       ..  uml::
+
+            @startuml
+            skinparam noteBackgroundColor #DDDDDD
+            skinparam noteBorderColor #666666
+
+            autonumber "<b>[000]"
+            hide footbox
+            TITLE 208.2 Retry registration process
+
+            participant CRequestUnwinder as main
+            participant CRequestUnwinderThread as thread
+            participant CIni_UnwinderManager as ini
+            -[#green]> main++: <color green>ExecuteSendToUnwinder()
+            NOTE over main: Other processing
+                main-[#green]->ini++: <color green>getSend_Retry_Count()
+                return <color green>RetryCount
+                main-[#green]->ini++: <color green>getSend_Retry_Interval()
+                return <color green>RetryInterval
+                LOOP <color green>i = 0; i < RetryCount; i++
+                    main-[#green]>CXmlSender++: <color green>Doit()
+                    return <color green>nRet
+                    OPT <color green> nRet == TRUE
+                        NOTE over main: // Response successfully
+                        BREAK
+                        END
+                    END
+                    main-[#green]> thread++: <color green>WaitCheckExit(RetryInterval)
+                    return <color green>nRet
+                    OPT <color green> nRet == TRUE
+                        NOTE over main: // Controller exits
+                        BREAK
+                        END
+                    END
+                END
+            NOTE over main: Other processing
+            return
+            @enduml

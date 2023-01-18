@@ -1,0 +1,14 @@
+NOTE FOR #7041: XJMF communication between TP and UW for GCS - XDn - 2022/1/13
+
+[SOURCE]
+    - Source code branch Ver1.00_base_3.50_#7041, based on branch Ver1.00_base_3.50.
+    - Package contains Preferences, Resource changes and the test report for this requirement.
+
+[NOTES]
+    - Preferences are changed base on revision 14392 of the XDn release.
+    - The test spec and design were updated.
+    - The test spec,test report and design were committed to SVN.
+    - Source file changes in change.txt file
+
+
+

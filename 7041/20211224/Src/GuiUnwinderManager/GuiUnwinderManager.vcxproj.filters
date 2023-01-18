@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="ClientThread.cpp">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiUnwinderManager.cpp">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="GuiUnwinderManagerDlg.cpp">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Ini_Template.cpp">
+      <Filter>UnwinderManager_</Filter>
+    </ClCompile>
+    <ClCompile Include="Ini_UnwinderManager.cpp">
+      <Filter>UnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="MakeComposeUnwinderData.cpp">
+      <Filter>UnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerThread.cpp">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="RequestUnwinder.cpp">
+      <Filter>UnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="CallUnwinderRequest.cpp">
+      <Filter>UnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="OutputLog.cpp">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="TestCommon.cpp">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Ini_PrinterDescriptor.cpp">
+      <Filter>UnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Ini_UnwinderManager_work.cpp">
+      <Filter>UnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="ReceiveSignalStatus.cpp">
+      <Filter>UnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlCompose.cpp">
+      <Filter>UnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlLogData.cpp">
+      <Filter>UnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlParse.cpp">
+      <Filter>UnwinderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlSender.cpp">
+      <Filter>UnwinderManager</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ClientThread.h">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiUnwinderManager.h">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Ini_UnwinderManager.h">
+      <Filter>UnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="MakeComposeUnwinderData.h">
+      <Filter>UnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerThread.h">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Other</Filter>
+    </ClInclude>
+    <ClInclude Include="RequestUnwinder.h">
+      <Filter>UnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="CallUnwinderRequest.h">
+      <Filter>UnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Ini_Template.h">
+      <Filter>UnwinderManager_</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiUnwinderManagerDlg.h">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="OutputLog.h">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="TestCommon.h">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>GuiUnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Ini_PrinterDescriptor.h">
+      <Filter>UnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Ini_UnwinderManager_work.h">
+      <Filter>UnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="ReceiveSignalStatus.h">
+      <Filter>UnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlCompose.h">
+      <Filter>UnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlLogdata.h">
+      <Filter>UnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlParse.h">
+      <Filter>UnwinderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlSender.h">
+      <Filter>UnwinderManager</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\GuiUnwinderManager.ico">
+      <Filter>Other</Filter>
+    </None>
+    <None Include="res\GuiUnwinderManager.rc2">
+      <Filter>Other</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="UnwinderManager_">
+      <UniqueIdentifier>{5dfa07ba-c5fc-4dd4-b1fe-11eef56a5bc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnwinderManager">
+      <UniqueIdentifier>{f992da56-29d3-42a1-ab50-7dca20452ab5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GuiUnwinderManager">
+      <UniqueIdentifier>{25dd637f-d5e4-4a65-be75-8e33a4d7262b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Other">
+      <UniqueIdentifier>{79c8400b-e974-4501-bc2f-153152519770}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GuiUnwinderManager.rc">
+      <Filter>Other</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
