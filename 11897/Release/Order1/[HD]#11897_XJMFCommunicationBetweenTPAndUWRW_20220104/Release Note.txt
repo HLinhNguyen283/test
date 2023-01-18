@@ -1,0 +1,10 @@
+RELEASE NOTE FOR #11897 Order1: XJMF communication between TP and UW/RW made by Company Ho - HD - 2022/01/04
+
+[SOURCE]
+    - Source code branch: Ver3.50JD015_#11897
+    - Package contains changed files in the Resource and Preferences folders for this requirement.
+
+[NOTES]
+    - The updated files in the Resource and Preferences folders are changed base on revision 15327 of the HD release.
+    - The design, test spec and test report were committed to SVN.
+    - Source file changes in change.txt file
