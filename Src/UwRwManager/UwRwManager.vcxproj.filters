@@ -1,0 +1,248 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Application">
+      <UniqueIdentifier>{d441f511-9c69-4aca-a009-81056c4293ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{0e7e8f5a-72fb-4009-a1f3-9e4d38e1f25a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Common">
+      <UniqueIdentifier>{1a832a7d-ad03-4a22-9913-cd6379d52056}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Plugin">
+      <UniqueIdentifier>{7b4ebf67-d767-453c-ba7d-3696ac7599e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\DataIF">
+      <UniqueIdentifier>{93ef0987-c0cc-4df8-84d5-6e3080b53d5f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\CCommonCBRProc.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\CommonCBRProc.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\PluginCommon.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="StdAfx.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="VersionInfo.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\BasePrinterIF.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CCommonCBRProc_OP.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CommonCBRProc_OP.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Plugin_IF.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="DataIF.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\Ini_Template.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Ini_TemplateLengthUnit.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CCommonCBRProc_OP_IPDS.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CommonCBRProc_OP_IPDS.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\ProcPlugin_Common.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Ini_PrinterDescriptor.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ResDef.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\ProcPluginCBRProc.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\BaseDataIF.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ReceiveSignalStatus.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\PaperDB_Callbacks.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\JobManager_Callbacks.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CommonConvertUnit.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\Ini_Prnv.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlCompose.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlLogData.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlParse.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlSender.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="ReceiveSignalStatusThread.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="MakeComposeUwRwData.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="Ini_UwRwManager.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="Ini_UwRwManager_work.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="RequestUwRwThread.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="RequestUwRw.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="UwRwManager.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\UwRwManager_Callbacks.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="UwRwManager_OP.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\CCommonCBRProc.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\CommonCBRProc.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\PluginCommon.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Framework\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\BasePrinterIF.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\PluginTemplate.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CCommonCBRProc_OP.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CommonCBRProc_OP.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Plugin_IF.cpp">
+      <Filter>Framework\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="DataIF.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\Ini_Template.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Ini_TemplateLengthUnit.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CCommonCBRProc_OP_IPDS.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CommonCBRProc_OP_IPDS.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\ProcPlugin_Common.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Ini_PrinterDescriptor.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\ProcPluginCBRProc.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\BaseDataIF.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="ReceiveSignalStatus.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CommonConvertUnit.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\Ini_Prnv.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlCompose.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlLogData.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlParse.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlSender.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="ReceiveSignalStatusThread.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Ini_UwRwManager.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="Ini_UwRwManager_work.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="MakeComposeUwRwData.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="RequestUwRwThread.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="RequestUwRw.cpp">
+      <Filter>Application</Filter>
+    </ClCompile>
+    <ClCompile Include="UwRwManager.cpp">
+      <Filter>Framework\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="UwRwManager_OP.cpp">
+      <Filter>Framework\Plugin</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc">
+      <Filter>Framework\Plugin</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

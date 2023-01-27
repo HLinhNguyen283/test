@@ -1,0 +1,284 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1BE7D6AF-4849-485D-AB17-10C21B70402F}</ProjectGuid>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(LocalAppData)\Microsoft\VisualStudio\10.0\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(LocalAppData)\Microsoft\VisualStudio\10.0\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(LocalAppData)\Microsoft\VisualStudio\10.0\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(LocalAppData)\Microsoft\VisualStudio\10.0\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>../../plugin/</OutDir>
+    <LinkIncremental>true</LinkIncremental>
+    <IgnoreImportLibrary>false</IgnoreImportLibrary>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>../../plugin/</OutDir>
+    <LinkIncremental>false</LinkIncremental>
+    <IgnoreImportLibrary>false</IgnoreImportLibrary>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>../../../../Common/Client/Src/Common;../../../../Common/Client/Src/$(ProjectName)/;../Common/;./;../Common/CenterTrans/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;PLUGINMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>./Debug/$(TargetName).pdb</ProgramDatabaseFile>
+      <OutputFile>../../Plugin/$(TargetName).dll</OutputFile>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>../../../../Common/Client/Src/Common/;../Common/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>imagehlp.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Manifest>
+      <OutputManifestFile>$(IntDir)$(TargetName)$(TargetExt).embed.manifest</OutputManifestFile>
+    </Manifest>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0411</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>../../../../Common/Client/Src/Common;../../../../Common/Client/Src/$(ProjectName)/;../Common/;./;../Common/CenterTrans/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGINMODULE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <StringPooling>true</StringPooling>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>../../pdb/$(TargetName).pdb</ProgramDatabaseFile>
+      <OutputFile>../../Plugin/$(TargetName).dll</OutputFile>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>../../../../Common/Client/Src/Common/;../Common/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>imagehlp.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0411</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\BasePrinterIF.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\CCommonCBRProc.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\CommonCBRProc.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\fileText.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\Ini_Prnv.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\Ini_Template.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\PluginCommon.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\PluginTemplate.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\ProcPluginCBRProc.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\tstring.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\XMLElement.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\XMLElementControl.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\XMLParser.cpp" />
+    <ClCompile Include="..\Common\BaseDataIF.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\CCommonCBRProc_OP.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\CommonCBRProc_OP.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\Common\CommonConvertUnit.cpp" />
+    <ClCompile Include="..\Common\DebugLogUtil.cpp" />
+    <ClCompile Include="..\Common\Ini_FlushingPageMagnification.cpp" />
+    <ClCompile Include="..\Common\Ini_PrinterDescriptor.cpp" />
+    <ClCompile Include="..\Common\Ini_PrinterParameter.cpp" />
+    <ClCompile Include="..\Common\Ini_StringsPrinterParameter.cpp" />
+    <ClCompile Include="..\Common\Ini_TemplateLengthUnit.cpp" />
+    <ClCompile Include="..\Common\McpuCommand\BaseMcpuCmd.cpp" />
+    <ClCompile Include="..\Common\McpuCommand\BaseMcpuDataIF.cpp" />
+    <ClCompile Include="..\Common\PaperDB_MigrationDef.cpp" />
+    <ClCompile Include="..\Common\ProcPlugin_Common.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ConvertMD5Hash.cpp" />
+    <ClCompile Include="DataIF.cpp" />
+    <ClCompile Include="DataRequestExport.cpp" />
+    <ClCompile Include="DataRequestExportXML.cpp" />
+    <ClCompile Include="DataSystemSetting.cpp" />
+    <ClCompile Include="ExportFile.cpp" />
+    <ClCompile Include="ExportFileUpdate.cpp" />
+    <ClCompile Include="ExportUtility.cpp" />
+    <ClCompile Include="ExportXML.cpp" />
+    <ClCompile Include="FinishFile.cpp" />
+    <ClCompile Include="Ini_PrintConditionExporter.cpp" />
+    <ClCompile Include="Plugin_IF.cpp" />
+    <ClCompile Include="PrintCondition.cpp" />
+    <ClCompile Include="PrintConditionExporter.cpp" />
+    <ClCompile Include="PrintConditionExporter_OP.cpp" />
+    <ClCompile Include="PrintConditionExportXML.cpp" />
+    <ClCompile Include="PrinterIF.cpp" />
+    <ClCompile Include="StdAfx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Stub_CenterTransIF.cpp" />
+    <ClCompile Include="Stub_JobManagerIF.cpp" />
+    <ClCompile Include="Stub_PaperDBIF.cpp" />
+    <ClCompile Include="Stub_PrinterStateIF.cpp" />
+    <ClCompile Include="UpdateRequestExport.cpp" />
+    <ClCompile Include="Utility.cpp" />
+    <ClCompile Include="ExportWriteTextFile.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\BasePrinterIF.h" />
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\CCommonCBRProc.h" />
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\CommonCBRProc.h" />
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\fileText.h" />
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\Ini_Prnv.h" />
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\Ini_Template.h" />
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\PluginCommon.h" />
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\ProcPluginCBRProc.h" />
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\tstring.h" />
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\XMLElement.h" />
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\XMLElementControl.h" />
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\XMLParser.h" />
+    <ClInclude Include="..\Common\BaseDataIF.h" />
+    <ClInclude Include="..\Common\CCommonCBRProc_OP.h" />
+    <ClInclude Include="..\Common\CenterTrans\ReceiveExportPaperData.h" />
+    <ClInclude Include="..\Common\CommonCBRProc_OP.h" />
+    <ClInclude Include="..\Common\CommonConvertUnit.h" />
+    <ClInclude Include="..\Common\DebugLogUtil.h" />
+    <ClInclude Include="..\Common\Ini_FlushingPageListData.h" />
+    <ClInclude Include="..\Common\Ini_FlushingPageMagnification.h" />
+    <ClInclude Include="..\Common\Ini_PrinterDescriptor.h" />
+    <ClInclude Include="..\Common\Ini_PrinterParameter.h" />
+    <ClInclude Include="..\Common\Ini_StringsPrinterParameter.h" />
+    <ClInclude Include="..\Common\Ini_TemplateLengthUnit.h" />
+    <ClInclude Include="..\Common\McpuCommand\BaseMcpuCmd.h" />
+    <ClInclude Include="..\Common\McpuCommand\BaseMcpuDataIF.h" />
+    <ClInclude Include="..\Common\PaperDB_MigrationDef.h" />
+    <ClInclude Include="..\Common\ProcPlugin_Common.h" />
+    <ClInclude Include="..\Common\ThreadSafe.h" />
+    <ClInclude Include="..\Common\ThreadSafeShareLock.h" />
+    <ClInclude Include="ConvertMD5Hash.h" />
+    <ClInclude Include="DataIF.h" />
+    <ClInclude Include="DataRequestExport.h" />
+    <ClInclude Include="DataRequestExportXML.h" />
+    <ClInclude Include="DataSystemSetting.h" />
+    <ClInclude Include="ExportFile.h" />
+    <ClInclude Include="ExportFileUpdate.h" />
+    <ClInclude Include="ExportUtility.h" />
+    <ClInclude Include="ExportXML.h" />
+    <ClInclude Include="FinishFile.h" />
+    <ClInclude Include="Ini_PrintConditionExporter.h" />
+    <ClInclude Include="Plugin_IF.h" />
+    <ClInclude Include="PrintCondition.h" />
+    <ClInclude Include="PrintConditionExporter.h" />
+    <ClInclude Include="PrintConditionExporter_OP.h" />
+    <ClInclude Include="PrintConditionExportXML.h" />
+    <ClInclude Include="PrintConditionExportXMLDef.h" />
+    <ClInclude Include="PrinterIF.h" />
+    <ClInclude Include="ResDef.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="Stub_CenterTransIF.h" />
+    <ClInclude Include="Stub_JobManagerIF.h" />
+    <ClInclude Include="Stub_PaperDBIF.h" />
+    <ClInclude Include="Stub_PrinterStateIF.h" />
+    <ClInclude Include="UpdateRequestExport.h" />
+    <ClInclude Include="Utility.h" />
+    <ClInclude Include="VersionInfo.h" />
+    <ClInclude Include="ExportWriteTextFile.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

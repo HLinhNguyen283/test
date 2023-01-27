@@ -1,0 +1,962 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Application">
+      <UniqueIdentifier>{d9e60ac8-e86c-48b6-ab2f-1050e57468d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GUI">
+      <UniqueIdentifier>{24e849f1-51dd-4192-850f-18be055a965f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\DataIF">
+      <UniqueIdentifier>{a85c2ec9-bf1f-4374-9e38-fd0faae7ccb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\PrinterIF">
+      <UniqueIdentifier>{20e81d18-bfc1-4d1d-9d02-72092352e95d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{cf763678-2ef0-4c3a-aaf3-fb9f811f6631}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Common">
+      <UniqueIdentifier>{c21e74ae-ea67-42d5-8dae-f6815fc57b68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Plugin">
+      <UniqueIdentifier>{9a11e0ba-447f-4178-962b-b2ad9184c6a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GUI\DlgDeleteDryerSettings">
+      <UniqueIdentifier>{33e99596-e390-4062-af52-abef4ccef4fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GUI\DlgAddDryerSettings">
+      <UniqueIdentifier>{6739db63-a411-42ec-bf70-824bef83b0ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GUI\DlgDeletePaperType">
+      <UniqueIdentifier>{82ded9ab-ef9e-40b3-b55e-d04cae125e13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GUI\DlgDeletePrintHeadAlignment">
+      <UniqueIdentifier>{b87aff76-0efe-40ea-9eb0-90e2a1cc4ff8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GUI\DlgPrintConditionDeleting">
+      <UniqueIdentifier>{77e50907-9307-4788-9a46-bd1ac734bf33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GUI\DlgSelectPreprintedMarkSide">
+      <UniqueIdentifier>{06e330c4-93b4-4334-b8b5-03cebfc4f9a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GUI\DlgAddPaperType">
+      <UniqueIdentifier>{33a7be5d-aab1-4955-8330-a2e0d799f01d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GUI\DlgAddPrintHeadAlignment">
+      <UniqueIdentifier>{1bafaf1c-7633-4542-99cd-59af3cc40163}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GUI\DlgAddPrintSetting">
+      <UniqueIdentifier>{f5defb5e-7c87-4700-9477-5fc0152d08fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GUI\DlgAddICCPreset">
+      <UniqueIdentifier>{30d6850b-e17d-4a74-9ea8-b586f57bd681}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\GUI\DlgVariableMagnification">
+      <UniqueIdentifier>{b5b9c031-ba3b-42b0-9712-a96249a55d42}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Plugin_IF.cpp">
+      <Filter>Framework\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="PrintConditionGUI_OP.cpp">
+      <Filter>Framework\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Framework\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="DataIF.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="PageMain.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="PrinterIF.cpp">
+      <Filter>Application\PrinterIF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\BaseCtl.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\BaseDlg.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\BaseDlg_OP.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\BasePage.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\BasePageList.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\BasePrinterIF.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\GuiPlugin_DlgGenSetup.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\CCommonCBRProc.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\CommonCBRProc.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\PluginCommon.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\PluginTemplate.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\PluginCBRProc.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\Ini_Template.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\BaseDataIF.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\GuiPlugin_Common.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CCommonCBRProc_OP.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CommonCBRProc_OP.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Ini_PrinterDescriptor.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\McpuCommand\BaseMcpuCmd.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="PrintConditionGUI.cpp">
+      <Filter>Framework\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlGpMain.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlCloseScreen.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlLockSettings.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPrintSettingsSelection.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPrintModeSelection.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPrintingSpeedSelection.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlCurrentPrintCondition.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlTensionSelection.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPrintHeadAlignSelection.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPaperTypeSelection.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPrecoatSelection.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlOvercoatSelection.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlDryerSettingsSelection.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPageSize.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPaperThickness.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlToneCurveSettings.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPrintConditionCommitting.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPaperOptionPreview.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPaperOption.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlClose_DlgDeleteDryer.cpp">
+      <Filter>Application\GUI\DlgDeleteDryerSettings</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlDeleteDryerSettingsSelection_DlgDeleteDryer.cpp">
+      <Filter>Application\GUI\DlgDeleteDryerSettings</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgDeleteDryerSettings.cpp">
+      <Filter>Application\GUI\DlgDeleteDryerSettings</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlCommitAddDryerSettings.cpp">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlFanDryerSettings.cpp">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPrecoatDryerSettings.cpp">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgAddDryerSettings.cpp">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgAddDryerSettingsWithPrecoat.cpp">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlDeletePaperTypeSelection.cpp">
+      <Filter>Application\GUI\DlgDeletePaperType</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgDeletePaperType.cpp">
+      <Filter>Application\GUI\DlgDeletePaperType</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlClose_DlgDeletePaperType.cpp">
+      <Filter>Application\GUI\DlgDeletePaperType</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlClose_DlgDeletePrintHead.cpp">
+      <Filter>Application\GUI\DlgDeletePrintHeadAlignment</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlDeletePrintHeadAlignmentSelection.cpp">
+      <Filter>Application\GUI\DlgDeletePrintHeadAlignment</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgDeletePrintHeadAlignment.cpp">
+      <Filter>Application\GUI\DlgDeletePrintHeadAlignment</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlClosePrintConditionDeleteDlg.cpp">
+      <Filter>Application\GUI\DlgPrintConditionDeleting</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPrintConditionList.cpp">
+      <Filter>Application\GUI\DlgPrintConditionDeleting</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgPrintConditionDeleting.cpp">
+      <Filter>Application\GUI\DlgPrintConditionDeleting</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlSideSelection.cpp">
+      <Filter>Application\GUI\DlgSelectPreprintedMarkSide</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgSelectPreprintedMarkSide.cpp">
+      <Filter>Application\GUI\DlgSelectPreprintedMarkSide</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlDuplicatePaperType.cpp">
+      <Filter>Application\GUI\DlgAddPaperType</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlNewPaperType.cpp">
+      <Filter>Application\GUI\DlgAddPaperType</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlSaveAndExitPaperType.cpp">
+      <Filter>Application\GUI\DlgAddPaperType</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgAddPaperType.cpp">
+      <Filter>Application\GUI\DlgAddPaperType</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlDuplicatePrintHeadAlignment.cpp">
+      <Filter>Application\GUI\DlgAddPrintHeadAlignment</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlNewPrintHeadAlignment.cpp">
+      <Filter>Application\GUI\DlgAddPrintHeadAlignment</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlSaveAndExitPrintHeadAlignment.cpp">
+      <Filter>Application\GUI\DlgAddPrintHeadAlignment</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgAddPrintHeadAlignment.cpp">
+      <Filter>Application\GUI\DlgAddPrintHeadAlignment</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlDuplicatePrintSettingName.cpp">
+      <Filter>Application\GUI\DlgAddPrintSetting</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlNewPrintSettingName.cpp">
+      <Filter>Application\GUI\DlgAddPrintSetting</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlSaveAndExitPrintSetting.cpp">
+      <Filter>Application\GUI\DlgAddPrintSetting</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgAddPrintSetting.cpp">
+      <Filter>Application\GUI\DlgAddPrintSetting</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlCloseSelectPreprintedMarkSideDlg.cpp">
+      <Filter>Application\GUI\DlgSelectPreprintedMarkSide</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Ini_TemplateLengthUnit.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\Ini_Prnv.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DataPaperType.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DataSystemSetting.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Ini_UserModeAccess.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DataPrintSettings.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DataDotgainCurve.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlInspectionSettingSelection.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="DataPrintHeadAlignment.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DataDryerSetting.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DataPreOverCoat.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlICCPresetSetting.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="DataICCPresetSetting.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgAddICCPreset.cpp">
+      <Filter>Application\GUI\DlgAddICCPreset</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlNewICCPreset.cpp">
+      <Filter>Application\GUI\DlgAddICCPreset</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlSaveAndExitICCPresetDlg.cpp">
+      <Filter>Application\GUI\DlgAddICCPreset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Ini_PrinterParameter.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Ini_StringsPrinterParameter.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DataPrintMode.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DataPaperSettings.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DataJetInspection.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Ini_PrintConditionGUI.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CommonConvertUnit.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Jpeg_io.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPrintSettingsName.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlDNS.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlScannedImage.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\BaseSpCtl.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\CommonWndCore.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\WndCoreClassNameList.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Ini_MainteJetInspection.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgPageMain.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlJobSetting.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="DataPrintConditionModeJobSetting.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgDummy.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlDuplicateJIAreaSetting.cpp">
+      <Filter>Application\GUI\DlgAddPrintSetting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\ProhibitChecker.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\UtilCom.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\WinMouse.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\WinTouch.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="PrintConditionGUI_OP_IPDS.cpp">
+      <Filter>Framework\Plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CCommonCBRProc_OP_IPDS.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\CommonCBRProc_OP_IPDS.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlOutputColorSelection.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="DataOutputColorSetting.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="Stub_JobManagerIF.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgAddDryerSettingsWithNir.cpp">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlNirDryerSettings.cpp">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\FlushingPatternLineWidth.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Ini_LayoutImageGUI.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Client\Src\Common\UtilTemplate.cpp">
+      <Filter>Framework\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Stub_PrintConditionImporter.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlImageStorage.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Stub_PaperDBIF.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="Stub_PrinterStateIF.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="Stub_PrintConditionExporter.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PrinterState\exportFiles\HDMonoUtility.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlVariableMagnification.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgVariableMagnification.cpp">
+      <Filter>Application\GUI\DlgVariableMagnification</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlVariableMagnificationInput.cpp">
+      <Filter>Application\GUI\DlgVariableMagnification</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlVariableMagnificationCommitClose.cpp">
+      <Filter>Application\GUI\DlgVariableMagnification</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlVariableMagnificationRip.cpp">
+      <Filter>Application\GUI\DlgVariableMagnification</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlVariableMagnificationReferencePlane.cpp">
+      <Filter>Application\GUI\DlgVariableMagnification</Filter>
+    </ClCompile>
+    <ClCompile Include="DataVariableMagnification.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Ini_FlushingPageMagnification.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPrimer.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="DataPrimer.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="PrintConditionGUIUtility.cpp">
+      <Filter>Application\DataIF</Filter>
+    </ClCompile>
+    <ClCompile Include="CtlPaperWeight.cpp">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Plugin_IF.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="ResDef.h">
+      <Filter>Application</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintConditionGUI_OP.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="VersionInfo.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="StdAfx.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="DataIF.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="PageMain.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="PrinterIF.h">
+      <Filter>Application\PrinterIF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\BaseCtl.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\BaseDlg.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\BaseDlg_OP.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\BasePage.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\BasePageDef.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\BasePageList.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\BasePrinterIF.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\GuiPlugin_DlgGenSetup.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\CCommonCBRProc.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\CommonCBRProc.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\PluginCommon.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\PluginCBRProc.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\Ini_Template.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\BaseDataIF.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\GuiPlugin_Common.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CCommonCBRProc_OP.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CommonCBRProc_OP.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Ini_PrinterDescriptor.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\McpuCommand\BaseMcpuCmd.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintConditionGUI.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlGpMain.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlCloseScreen.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlLockSettings.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPrintSettingsSelection.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPrintModeSelection.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPrintingSpeedSelection.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlCurrentPrintCondition.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlTensionSelection.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPrintHeadAlignSelection.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPaperTypeSelection.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPrecoatSelection.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlOvercoatSelection.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlDryerSettingsSelection.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPageSize.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPaperThickness.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlToneCurveSettings.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPrintConditionCommitting.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPaperOptionPreview.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPaperOption.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlClose_DlgDeleteDryer.h">
+      <Filter>Application\GUI\DlgDeleteDryerSettings</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlDeleteDryerSettingsSelection_DlgDeleteDryer.h">
+      <Filter>Application\GUI\DlgDeleteDryerSettings</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgDeleteDryerSettings.h">
+      <Filter>Application\GUI\DlgDeleteDryerSettings</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlCommitAddDryerSettings.h">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlFanDryerSettings.h">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPrecoatDryerSettings.h">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgAddDryerSettings.h">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgAddDryerSettingsWithPrecoat.h">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlDeletePaperTypeSelection.h">
+      <Filter>Application\GUI\DlgDeletePaperType</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgDeletePaperType.h">
+      <Filter>Application\GUI\DlgDeletePaperType</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlClose_DlgDeletePaperType.h">
+      <Filter>Application\GUI\DlgDeletePaperType</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlClose_DlgDeletePrintHead.h">
+      <Filter>Application\GUI\DlgDeletePrintHeadAlignment</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlDeletePrintHeadAlignmentSelection.h">
+      <Filter>Application\GUI\DlgDeletePrintHeadAlignment</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgDeletePrintHeadAlignment.h">
+      <Filter>Application\GUI\DlgDeletePrintHeadAlignment</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlClosePrintConditionDeleteDlg.h">
+      <Filter>Application\GUI\DlgPrintConditionDeleting</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPrintConditionList.h">
+      <Filter>Application\GUI\DlgPrintConditionDeleting</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgPrintConditionDeleting.h">
+      <Filter>Application\GUI\DlgPrintConditionDeleting</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlSideSelection.h">
+      <Filter>Application\GUI\DlgSelectPreprintedMarkSide</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgSelectPreprintedMarkSide.h">
+      <Filter>Application\GUI\DlgSelectPreprintedMarkSide</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlDuplicatePaperType.h">
+      <Filter>Application\GUI\DlgAddPaperType</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlNewPaperType.h">
+      <Filter>Application\GUI\DlgAddPaperType</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlSaveAndExitPaperType.h">
+      <Filter>Application\GUI\DlgAddPaperType</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgAddPaperType.h">
+      <Filter>Application\GUI\DlgAddPaperType</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlDuplicatePrintHeadAlignment.h">
+      <Filter>Application\GUI\DlgAddPrintHeadAlignment</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlNewPrintHeadAlignment.h">
+      <Filter>Application\GUI\DlgAddPrintHeadAlignment</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlSaveAndExitPrintHeadAlignment.h">
+      <Filter>Application\GUI\DlgAddPrintHeadAlignment</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgAddPrintHeadAlignment.h">
+      <Filter>Application\GUI\DlgAddPrintHeadAlignment</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlDuplicatePrintSettingName.h">
+      <Filter>Application\GUI\DlgAddPrintSetting</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlNewPrintSettingName.h">
+      <Filter>Application\GUI\DlgAddPrintSetting</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlSaveAndExitPrintSetting.h">
+      <Filter>Application\GUI\DlgAddPrintSetting</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgAddPrintSetting.h">
+      <Filter>Application\GUI\DlgAddPrintSetting</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlCloseSelectPreprintedMarkSideDlg.h">
+      <Filter>Application\GUI\DlgSelectPreprintedMarkSide</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Ini_TemplateLengthUnit.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\Ini_Prnv.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DataPaperType.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DataSystemSetting.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Ini_UserModeAccess.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DataPrintSettings.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DataDotgainCurve.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintConditionGUIDef.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlInspectionSettingSelection.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="DataPrintHeadAlignment.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DataDryerSetting.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DataPreOverCoat.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlICCPresetSetting.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="DataICCPresetSetting.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgAddICCPreset.h">
+      <Filter>Application\GUI\DlgAddICCPreset</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlNewICCPreset.h">
+      <Filter>Application\GUI\DlgAddICCPreset</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlSaveAndExitICCPresetDlg.h">
+      <Filter>Application\GUI\DlgAddICCPreset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Ini_PrinterParameter.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Ini_StringsPrinterParameter.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DataPrintMode.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DataPaperSettings.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DataJetInspection.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\JobManager_Callbacks.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\PaperDBDef_OP.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Ini_PrintConditionGUI.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CommonConvertUnit.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Jpeg_io.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPrintSettingsName.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlDNS.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlScannedImage.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\BaseSpCtl.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\CommonWndCore.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\WndCoreClassNameList.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Ini_MainteJetInspection.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgPageMain.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlJobSetting.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="DataPrintConditionModeJobSetting.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgDummy.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlDuplicateJIAreaSetting.h">
+      <Filter>Application\GUI\DlgAddPrintSetting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\ProhibitChecker.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\UtilCom.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\WinMouse.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\WinTouch.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintConditionGUI_OP_IPDS.h">
+      <Filter>Framework\Plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CCommonCBRProc_OP_IPDS.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\CommonCBRProc_OP_IPDS.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlOutputColorSelection.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="DataOutputColorSetting.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="Stub_JobManagerIF.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgAddDryerSettingsWithNir.h">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlNirDryerSettings.h">
+      <Filter>Application\GUI\DlgAddDryerSettings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\FlushingPatternLineWidth.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Ini_LayoutImageGUI.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Client\Src\Common\UtilTemplate.h">
+      <Filter>Framework\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Stub_PrintConditionImporter.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlImageStorage.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Stub_PaperDBIF.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="Stub_PrinterStateIF.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="Stub_PrintConditionExporter.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PrinterState\exportFiles\HDMonoUtility.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlVariableMagnification.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgVariableMagnification.h">
+      <Filter>Application\GUI\DlgVariableMagnification</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlVariableMagnificationInput.h">
+      <Filter>Application\GUI\DlgVariableMagnification</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlVariableMagnificationCommitClose.h">
+      <Filter>Application\GUI\DlgVariableMagnification</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlVariableMagnificationRip.h">
+      <Filter>Application\GUI\DlgVariableMagnification</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlVariableMagnificationReferencePlane.h">
+      <Filter>Application\GUI\DlgVariableMagnification</Filter>
+    </ClInclude>
+    <ClInclude Include="DataVariableMagnification.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Ini_FlushingPageMagnification.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPrimer.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="DataPrimer.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintConditionGUIUtility.h">
+      <Filter>Application\DataIF</Filter>
+    </ClInclude>
+    <ClInclude Include="CtlPaperWeight.h">
+      <Filter>Application\GUI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc">
+      <Filter>Framework\Plugin</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
