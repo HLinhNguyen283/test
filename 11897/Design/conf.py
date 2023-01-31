@@ -41,11 +41,12 @@ source_suffix = '.plantuml'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = '[HD]#11897_XJMFCommunicationBetweenTPAndUWRW'
+master_doc = '[HD]#11897_Order3_Implementation of Exchanging printing condition information with UW/RW" and "Requesting UW/RW to measure paper thickness'
+
 
 # General information about the project.
 project = u'JetDrive'
-copyright = u'2020, GCS'
+copyright = u'2023, GCS'
 author = u'GCS'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -115,7 +116,8 @@ html_theme_options = {
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = '[HD] #11897 XJMF Communication between TP and UWRW'
+html_title = '[HD]#11897_Order3 Implementation of Exchanging printing condition information with UW/RW" and "Requesting UW/RW to measure paper thickness'
+
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
