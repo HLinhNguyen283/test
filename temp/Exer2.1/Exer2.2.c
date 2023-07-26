@@ -41,6 +41,7 @@ const char *import_files[] = {
     "file4.txt",
     "file5.txt"};
 
+void processToImportfile(const char *filename, int socket_fd, int shm_id);
 void sendMessage(int socket_fd, const char *message);
 void receiveMessage(int socket_fd, const char *buffer);
 void writeToSharedMemory(int shm_id, const struct Email *email);
@@ -51,17 +52,13 @@ void writeToSummaryFile(const char *filename, const struct Email *email)
 {
     printf("a\n");
     FILE *file = fopen(filename, "a");
-    if (ftell(file) == 0)
-    {
+    if (ftell(file) == 0) {
         fprintf(file, "From;To;Content\n");
     }
-    if (file)
-    {
+    if (file) {
         fprintf(file, "%s;%s;%s\n", email->sender, email->receiver, email->content);
         fclose(file);
-    }
-    else
-    {
+    } else {
         perror("Error opening summary file");
     }
 }
