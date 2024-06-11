@@ -151,7 +151,7 @@ void processChild(int socket_fd, int shm_id, const char *summary_file)
 void processParent(int socket_fd, int shm_id, const char *files[])
 {
 
-    // // Check if Process 2 is alive
+    // i < 5;
     // sendMessage(socket_fd, IS_ALIVE_MESSAGE);
 
     // // Wait for response from Process 2
