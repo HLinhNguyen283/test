@@ -2,4 +2,3 @@ cal.c/addThreeFractions;1;1;;;;;;
 AMSTB_addThreeFractions_addFractions;addFractions;;;;;;;
 #COMMENT;@fraction_1.numerator;@fraction_1.denominator;@fraction_2.numerator;@fraction_2.denominator;@fraction_3.numerator;@fraction_3.denominator;@@return.numerator;@@return.denominator
 ;1;1;1;1;1;1;1;1
-    

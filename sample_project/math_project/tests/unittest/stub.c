@@ -6,4 +6,4 @@ Fraction AMSTB_addThreeFractions_addFractions(const Fraction& fraction1, const F
     Fraction volatile AMOUT_fraction2 = fraction2;
 
     return AMIN_return;
-}   
+}

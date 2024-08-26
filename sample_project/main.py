@@ -47,25 +47,107 @@
 # if __name__ == "__main__":
 #     generate_stub_and_csv()
 
+import os
+import argparse
+
+parser = argparse.ArgumentParser(description="Python mini-game")
+parser.add_argument('project_name', type=str, help="math_project")
+
+args = parser.parse_args()
 
 
-import re, os
+# List the contents of the 'sample_project' directory
+current_file_path = os.path.abspath(__file__)
+project_path = os.path.dirname(current_file_path)
 
-# Function to extract function signatures from a C file content
-def extract_function_signatures(c_file_content):
-    # Regex to match C function signatures
-    pattern = r'\w+\s+\w+\([^)]*\)\s*\{'
-    matches = re.findall(pattern, c_file_content)
-    return matches
+# List the contents of the 'math_project' directory
+math_project_path = os.path.join(project_path, args.project_name)
 
-# Extract function signatures from both cal.c and fraction.c
-fraction_c_path = os.path.join(src_dir, 'fraction.c')
+# List the contents of the 'src' directory
+src_path = os.path.join(math_project_path, 'src')
+src_contents = os.listdir(src_path)
+src_contents
+
+# Read the contents of the .c files
+cal_c_path = os.path.join(src_path, 'cal.c')
+fraction_c_path = os.path.join(src_path, 'fraction.c')
+
+with open(cal_c_path, 'r') as file:
+    cal_c_content = file.read()
 
 with open(fraction_c_path, 'r') as file:
     fraction_c_content = file.read()
 
-# Extract function signatures
-cal_signatures = extract_function_signatures(cal_c_content)
-fraction_signatures = extract_function_signatures(fraction_c_content)
+# Show a portion of the content to understand the structure
+cal_c_content[:500], fraction_c_content[:500]
 
-cal_signatures, fraction_signatures
+import re
+
+# Function to extract function signatures
+def extract_function_signatures(c_content):
+    # Regular expression to match function signatures
+    function_pattern = re.compile(
+        r'(\w[\w\s\*]+)\s+(\w+)\s*\(([^)]*)\)\s*{'
+    )
+    matches = function_pattern.findall(c_content)
+    
+    # Extracted information
+    functions = []
+    for return_type, name, params in matches:
+        # Clean up the return type and parameters
+        return_type = return_type.strip()
+        params = [param.strip() for param in params.split(',')] if params else []
+        functions.append({
+            'return_type': return_type,
+            'name': name,
+            'params': params
+        })
+    return functions
+
+# Extract function signatures from both files
+cal_functions = extract_function_signatures(cal_c_content)
+fraction_functions = extract_function_signatures(fraction_c_content)
+
+# Display the extracted information
+print(cal_functions)
+print(fraction_functions)
+
+# Function to generate stub.c content from function signatures
+def generate_stub_c_content(functions):
+    stub_content = ""
+    for func in functions:
+        params_str = ", ".join(func['params'])
+        stub_content += f"{func['return_type']} {func['name']}({params_str});\n\n"
+    return stub_content
+
+# Generate the content for stub.c
+stub_c_content = generate_stub_c_content(cal_functions + fraction_functions)
+
+# Path to save the stub.c file
+stub_c_path = os.path.join(project_path, 'stub.c')
+
+# Write the stub.c file
+with open(stub_c_path, 'w') as file:
+    file.write(stub_c_content)
+
+# Show the generated stub.c content
+stub_c_content
+
+import csv
+
+# Path to save the CSV file
+csv_file_path = os.path.join(project_path, 'functions.csv')
+
+# Prepare data for the CSV file
+csv_data = [['Function Name', 'Return Type', 'Parameters']]
+for func in cal_functions + fraction_functions:
+    params_str = "; ".join(func['params']) if func['params'] else "None"
+    csv_data.append([func['name'], func['return_type'], params_str])
+
+# Write to the CSV file
+with open(csv_file_path, mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerows(csv_data)
+
+# Show the path where CSV is saved
+csv_file_path
