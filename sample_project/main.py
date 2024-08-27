@@ -19,7 +19,7 @@ def generate_stub_and_csv(project_name: str):
     print(all_functions)
     # Generate the functions.csv file
     csv_generator = CCSVGenerator(all_functions, file_processor.project_path)
-    csv_generator.write_csv_file()
+    csv_generator.write_csv_files()
 
 
 if __name__ == "__main__":

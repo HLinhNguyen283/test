@@ -13,7 +13,8 @@ class CFileProcessor:
         self.src_path = osp.join(self.project_path, "src")
 
         self.c_file_contents = {}
-
+        print(self.c_file_contents)
+        
     def read_c_files(self):
         for root, dirs, files in os.walk(self.src_path):
             for file in files:
@@ -33,7 +34,10 @@ class CFileProcessor:
                 params = (
                     [param.strip() for param in params.split(",")] if params else []
                 )
-                all_functions.append(
-                    {"return_type": return_type, "name": name, "params": params}
-                )
+                all_functions.append({
+                    "return_type": return_type,
+                    "name": name,
+                    "params": params,
+                    "source_file": file_name  # Add the source file name to the function info
+                })
         return all_functions
