@@ -9,16 +9,17 @@ from engine.csv_gen.csv_generator import CCSVGenerator
 def generate_stub_and_csv(project_name: str):
     # Instantiate the FileReader class
     file_processor = CFileProcessor(project_name)
+    file_processor.read_c_files()
 
     # Extract function signatures using the FunctionExtractor class
-    all_functions = file_processor.extract_function_signatures()
+    file_processor.extract_function_signatures()
 
     # Generate the stub.c file_processor
-    stub_generator = CStubGenerator(all_functions, file_processor.project_path)
+    stub_generator = CStubGenerator(file_processor)
     stub_generator.write_stub_file()
-    print(all_functions)
+
     # Generate the functions.csv file
-    csv_generator = CCSVGenerator(all_functions, file_processor.project_path)
+    csv_generator = CCSVGenerator(file_processor)
     csv_generator.write_csv_files()
 
 

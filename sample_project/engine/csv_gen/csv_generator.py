@@ -1,25 +1,25 @@
 import os
 import csv
 
+from engine.file_processor.file_processor import CFileProcessor
+
 
 class CCSVGenerator:
-    def __init__(self, functions, project_path):
-        self.functions = functions
-        self.output_path = os.path.join(
-            project_path, "tests", "unittest", "test_csv"
-        )
+    def __init__(self, file_processor: CFileProcessor):
+        self._file_processor = file_processor
 
     def write_csv_files(self):
-        # Ensure the output directory exists
-        os.makedirs(os.path.dirname(self.output_path), exist_ok=True)
         # Prepare data for the CSV file
-        
-        for func in self.functions:
+        output_dir = self._file_processor.get_test_csv_path()
+        for func in self._file_processor.get_functions():
             # Create a CSV file for each function
             function_name = func["name"]
-            source_file = func.get("source_file", "unknown").replace(".c", "").replace(".", "_")
+            source_file = (
+                func.get("source_file", "unknown").replace(".c", "").replace(".", "_")
+            )
+
             csv_file_name = f"{source_file}_{function_name}.csv"
-            csv_file_path = os.path.join(self.output_path, csv_file_name)
+            csv_file_path = os.path.join(output_dir, csv_file_name)
 
             with open(csv_file_path, mode="w", newline="") as file:
                 writer = csv.writer(file)
