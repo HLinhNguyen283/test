@@ -1,5 +1,4 @@
 import argparse
-import os
 
 from engine.file_processor.file_processor import CFileProcessor
 from engine.stub_gen.stub_generator import CStubGenerator

@@ -66,7 +66,7 @@ class CFileProcessor:
                     self._functions.append(
                         {
                             "return_type": return_type,
-                            "name": name,
+                            "func_name": name,
                             "params": params,
                             "source_file": file_name,
                         }

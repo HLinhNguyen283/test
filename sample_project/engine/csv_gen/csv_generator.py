@@ -11,11 +11,12 @@ class CCSVGenerator:
     def write_csv_files(self):
         # Prepare data for the CSV file
         output_dir = self._file_processor.get_test_csv_path()
+        print(self._file_processor.get_functions())
         for func in self._file_processor.get_functions():
             # Create a CSV file for each function
-            function_name = func["name"]
+            function_name = func["func_name"]
             source_file = (
-                func.get("source_file", "unknown").replace(".c", "").replace(".", "_")
+                func.get("source_file", "unknown").replace(".c", "_c")
             )
 
             csv_file_name = f"{source_file}_{function_name}.csv"
@@ -25,4 +26,4 @@ class CCSVGenerator:
                 writer = csv.writer(file)
                 writer.writerow(["Function Name", "Return Type", "Parameters"])
                 params_str = "; ".join(func["params"]) if func["params"] else "None"
-                writer.writerow([func["name"], func["return_type"], params_str])
+                writer.writerow([func["func_name"], func["return_type"], params_str])

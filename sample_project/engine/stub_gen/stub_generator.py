@@ -17,7 +17,7 @@ class CStubGenerator:
         stub_content += "\n"
 
         for func in self._file_processor.get_functions():
-            stub_function_name = f"AMSTB_{func['name']}"
+            stub_function_name = f"AMSTB_{func['func_name']}"
             param_strs = []
             for param in func["params"]:
                 param_name = param.split()[-1]
