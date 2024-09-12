@@ -4,7 +4,7 @@ import re
 import os.path as osp
 
 
-class CFileProcessor:
+class CFileProcessor(object):
     _instance = None
 
     def __new__(cls, project_name):
@@ -25,7 +25,7 @@ class CFileProcessor:
 
         self._c_file_contents = {}
         self._includes = set()
-        self._functions = None  # Store function signatures
+        self._functions_signatures = None  # Store function signatures
 
         # Ensure the required directories exist
         self._create_directories()
@@ -53,24 +53,40 @@ class CFileProcessor:
                         self._includes.update(includes)
 
     def extract_function_signatures(self):
-        if self._functions is None:
+        if self._functions_signatures is None:
             function_pattern = re.compile(r"(\w[\w\s\*]+)\s+(\w+)\s*\(([^)]*)\)\s*{")
-            self._functions = []
+            func_call_pattern = re.compile(r"\b(\w+)\s*\(")
+            self._functions_signatures = []
             for file_name, content in self._c_file_contents.items():
                 matches = function_pattern.findall(content)
-                for return_type, name, params in matches:
+                calls = func_call_pattern.findall(content)
+
+                for return_type, func_name, params in matches:
                     return_type = return_type.strip()
                     params = (
                         [param.strip() for param in params.split(",")] if params else []
                     )
-                    self._functions.append(
+                    self._functions_signatures.append(
                         {
                             "return_type": return_type,
-                            "func_name": name,
+                            "func_name": func_name,
                             "params": params,
                             "source_file": file_name,
                         }
                     )
+                # Find function calls within this function
+                self._find_called_functions(content, func_name)
+
+    def _find_called_functions(self, content, function_name):
+        # Regular expression to find function calls
+        func_call_pattern = re.compile(r"\b(\w+)\s*\(")
+        calls = func_call_pattern.findall(content)
+
+        # Remove self function from the list of called functions
+        calls = [call for call in calls if call != function_name]
+
+        if function_name not in self._called_functions:
+            self._called_functions[function_name] = calls
 
     def get_project_name(self) -> str:
         return self._project_name
@@ -97,4 +113,4 @@ class CFileProcessor:
         return self._includes
 
     def get_functions(self):
-        return self._functions
+        return self._functions_signatures

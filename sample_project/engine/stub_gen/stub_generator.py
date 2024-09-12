@@ -10,7 +10,7 @@ class CStubGenerator:
             self._file_processor.get_unittest_path(), "stub.c"
         )
 
-    def generate_stub_c_content(self):
+    def _generate_stub_c_content(self):
         stub_content = ""
         for include in self._file_processor.get_includes():
             stub_content += f'#include "{include}"\n'
@@ -36,6 +36,6 @@ class CStubGenerator:
 
     def write_stub_file(self):
         # Write the stub content to the file
-        stub_content = self.generate_stub_c_content()
+        stub_content = self._generate_stub_c_content()
         with open(self._output_path, "w") as file:
             file.write(stub_content)
